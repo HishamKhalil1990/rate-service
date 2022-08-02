@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 const createAllRates = async(params) => {
-    await prisma.rate.createMany({
+    return await prisma.rate.createMany({
         data: params
     })
 }

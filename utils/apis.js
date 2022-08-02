@@ -30,7 +30,7 @@ const postData = async (url,data) => {
         method: 'post',
         baseURL: BASE_URL,
         headers,
-        data
+        data:JSON.stringify(data)
     })
 }
 
@@ -43,7 +43,7 @@ const putData = async (url,data) => {
         method: 'put',
         baseURL: BASE_URL,
         headers,
-        data
+        data:JSON.stringify(data)
     })
 }
 
@@ -56,7 +56,7 @@ const deleteData = async (url,data) => {
         method: 'delete',
         baseURL: BASE_URL,
         headers,
-        data
+        data:JSON.stringify(data)
     })
 }
 
