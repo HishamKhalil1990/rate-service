@@ -1,0 +1,22 @@
+generator Client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url = env("DATABASE_URL")
+}
+
+model rate {
+    id Int @id @default(autoincrement())
+    warehouse String
+    visit String
+    firstAnswer String @default("1")
+    secondAnswer String @default("1")
+    thirdAnswer String @default("1")
+    fourthAnswer String @default("1")
+    fifthAnswer String @default("1")
+    note String
+    username String
+    createdAt DateTime @default(now())
+}
