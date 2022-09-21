@@ -1,6 +1,9 @@
 require('dotenv').config()
 const api = require('./apis')
 const prisma = require('./prisma')
+const jwt = require("jsonwebtoken");
+
+const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 
 const fetchRates = async() => {
     try{
@@ -50,6 +53,25 @@ const deleteFetched = async(list) => {
     return response.data.msg
 }
 
+const authentication = (req,res,next) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if(!token){
+        res.send({
+            status: 'unauthorized',
+        })
+    }else{
+        jwt.verify(token, TOKEN_SECRET_KEY, (err, user) => {
+            if (err) return res.send({
+                status: 'unauthorized',
+            });
+            req.user = user;
+            next();   
+        }); 
+    }
+}
+
 module.exports = {
-    fetchRates
+    fetchRates,
+    authentication
 }

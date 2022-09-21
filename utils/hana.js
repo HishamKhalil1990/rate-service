@@ -7,6 +7,8 @@ const HANA_USER = process.env.HANA_USER;
 const HANA_PASSWORD = process.env.HANA_PASSWORD;
 const HANA_DATABASE = process.env.HANA_DATABASE;
 const HANA_SUPERVISOR_OREDERS_PROCEDURE = process.env.HANA_SUPERVISOR_OREDERS_PROCEDURE;
+const HANA_MALTRANS_DATABASE = process.env.HANA_MALTRANS_DATABASE;
+const HANA_MALTRANS_TABLE = process.env.HANA_MALTRANS_TABLE;
 
 const hanaConfig = {
   serverNode: `${HANA_HOST}:30015`,
@@ -21,6 +23,12 @@ const getSupervisorOrders = async (cardcode) => {
   const procedureStatment = `CALL "${HANA_DATABASE}"."${HANA_SUPERVISOR_OREDERS_PROCEDURE}" ('${cardcode}')`;
   return execute(procedureStatment);
 };
+
+const getBillOfLadingInfo = async (billNo) => {
+  const statment = `Select * from "${HANA_MALTRANS_DATABASE}"."${HANA_MALTRANS_TABLE}" where BL = ?`
+  const values = [billNo]
+  return executeStatement(statment,values)
+}
 
 const execute = async (procdure) => {
   return new Promise((resolve, reject) => {
@@ -47,6 +55,30 @@ const execute = async (procdure) => {
   });
 };
 
+const executeStatement = async(statment,values) => {
+  return new Promise((resolve, reject) => {
+    try {
+      connection.connect(hanaConfig,(err) => {
+        if (err) {
+          console.log(err);
+          reject();
+        } 
+        connection.exec(statment,values,(err, result) => {
+          if (err) {
+            console.log(err);
+            reject();
+          } 
+          connection.disconnect();
+          resolve(result);
+        })
+      });
+    } catch (err) {
+      reject();
+    }
+  });
+}
+
 module.exports = {
-    getSupervisorOrders
+    getSupervisorOrders,
+    getBillOfLadingInfo
 };
