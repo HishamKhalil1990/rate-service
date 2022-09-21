@@ -59,11 +59,13 @@ const authentication = (req,res,next) => {
     if(!token){
         res.send({
             status: 'unauthorized',
+            msg : "session has been ended"
         })
     }else{
         jwt.verify(token, TOKEN_SECRET_KEY, (err, user) => {
             if (err) return res.send({
                 status: 'unauthorized',
+                msg : "session has been ended"
             });
             req.user = user;
             next();   
