@@ -2,8 +2,10 @@ require('dotenv').config()
 const api = require('./apis')
 const prisma = require('./prisma')
 const jwt = require("jsonwebtoken");
+const sql = require('./sql')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
+const USERS_TABLE = process.env.USERS_TABLE
 
 const fetchRates = async() => {
     try{
@@ -53,6 +55,20 @@ const deleteFetched = async(list) => {
     return response.data.msg
 }
 
+const createToken = (username) => {
+    return jwt.sign({ username: username }, TOKEN_SECRET_KEY, {
+      expiresIn: "24h",
+    });
+};
+
+const create = (username) => {
+    auth = {
+        token : createToken(username),
+        expiresIn : '24 hour'
+    }
+    return auth
+}
+
 const authentication = (req,res,next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -73,7 +89,27 @@ const authentication = (req,res,next) => {
     }
 }
 
+const getUser = async (username,password) => {
+    try{
+        const pool = await sql.getSQL();
+        if(pool){
+            const user = await pool.request().query(`select * from ${USERS_TABLE} where Username = '${username}' and Password = '${password}'`)
+            .then(result => {
+                pool.close();
+                return result.recordset;
+            })
+            return user
+        }else{
+            return
+        }
+    }catch(err){
+        return
+    }
+}
+
 module.exports = {
     fetchRates,
-    authentication
+    authentication,
+    create,
+    getUser
 }

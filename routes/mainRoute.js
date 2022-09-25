@@ -7,5 +7,6 @@ const authentication = functions.authentication
 
 router.get('/supervisor/:cardcode',controller.supervisorOrders)
 router.post('/bill-of-lading',authentication,controller.billOfLadingInfo)
+router.post('/check-maltrans-user', controller.checkMaltransUser)
 
 module.exports = router
