@@ -9,7 +9,7 @@ const mainRouter = require('./routes/mainRoute')
 const PORT = process.env.PORT
 
 const app = express()
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '50mb'}))
 app.use(cors())
 app.listen(PORT, (err) => {
     if(err){

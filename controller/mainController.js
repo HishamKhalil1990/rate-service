@@ -63,8 +63,15 @@ const checkMaltransUser = async(req,res) => {
     }
 }
 
+const saveMaltData = async(req,res) => {
+    let data = req.body
+    console.log(data)
+    res.send({msg:'done'})
+}
+
 module.exports = {
     supervisorOrders,
     billOfLadingInfo,
-    checkMaltransUser
+    checkMaltransUser,
+    saveMaltData
 }
