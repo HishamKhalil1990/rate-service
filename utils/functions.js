@@ -3,9 +3,11 @@ const api = require('./apis')
 const prisma = require('./prisma')
 const jwt = require("jsonwebtoken");
 const sql = require('./sql')
+const fs = require('fs')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const USERS_TABLE = process.env.USERS_TABLE
+const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
 
 const fetchRates = async() => {
     try{
@@ -107,9 +109,22 @@ const getUser = async (username,password) => {
     }
 }
 
+const savePdf = (fileStr,fileName) => {
+    const data = fileStr.split(',')[1]
+    let buf = Buffer.from(data, 'base64');
+    fs.writeFile(`${PDF_FOLDER_PATH}/${fileName}`, buf, error => {
+        if (error) {
+            throw error;
+        } else {
+            console.log('buffer saved!');
+        }
+    });
+}
+
 module.exports = {
     fetchRates,
     authentication,
     create,
-    getUser
+    getUser,
+    savePdf
 }

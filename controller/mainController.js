@@ -1,6 +1,5 @@
 const hana = require('../utils/hana')
 const functions = require('../utils/functions')
-const fs = require('fs')
 
 const supervisorOrders = async(req,res) => {
     const {cardcode} = req.params
@@ -66,15 +65,18 @@ const checkMaltransUser = async(req,res) => {
 
 const saveMaltData = async(req,res) => {
     let data = req.body
-    data = data['FileOne'].split(',')[1]
-    let buf = Buffer.from(data, 'base64');
-    fs.writeFile('./pdf/hisham.pdf', buf, error => {
-        if (error) {
-            throw error;
-        } else {
-            console.log('buffer saved!');
-        }
-    });
+    if(data['FileOneName'] != ""){
+        functions.savePdf(data['FileOne'],data['FileOneName'])
+    }
+    if(data['FileTwoName'] != ""){
+        functions.savePdf(data['FileTwo'],data['FileTwoName'])
+    }
+    if(data['FileThreeName'] != ""){
+        functions.savePdf(data['FileThree'],data['FileThreeName'])
+    }
+    if(data['FileFourName'] != ""){
+        functions.savePdf(data['FileFour'],data['FileFourName'])
+    }
     res.send({msg:'done'})
 }
 
