@@ -65,7 +65,7 @@ const checkMaltransUser = async(req,res) => {
 
 const saveMaltData = async(req,res) => {
     let data = req.body
-    console.log(data)
+    console.log(data['FileOne'])
     res.send({msg:'done'})
 }
 
