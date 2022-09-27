@@ -65,19 +65,29 @@ const checkMaltransUser = async(req,res) => {
 
 const saveMaltData = async(req,res) => {
     let data = req.body
-    if(data['FileOneName'] != ""){
-        functions.savePdf(data['FileOne'],data['FileOneName'])
+    try{
+        if(data['FileOneName'] != ""){
+            functions.savePdf(data['FileOne'],data['FileOneName'])
+        }
+        if(data['FileTwoName'] != ""){
+            functions.savePdf(data['FileTwo'],data['FileTwoName'])
+        }
+        if(data['FileThreeName'] != ""){
+            functions.savePdf(data['FileThree'],data['FileThreeName'])
+        }
+        if(data['FileFourName'] != ""){
+            functions.savePdf(data['FileFour'],data['FileFourName'])
+        }
+    }catch(err){
+        res.send({
+            status: 'faild',
+            msg: 'server internal error!, could not save files. please try again'
+        })
     }
-    if(data['FileTwoName'] != ""){
-        functions.savePdf(data['FileTwo'],data['FileTwoName'])
-    }
-    if(data['FileThreeName'] != ""){
-        functions.savePdf(data['FileThree'],data['FileThreeName'])
-    }
-    if(data['FileFourName'] != ""){
-        functions.savePdf(data['FileFour'],data['FileFourName'])
-    }
-    res.send({msg:'done'})
+    res.send({
+        status: 'success',
+        msg: 'Submit is Done'
+    })
 }
 
 module.exports = {
