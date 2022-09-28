@@ -6,7 +6,8 @@ const MSSQL_LOCAL_ADDRESS = process.env.MSSQL_LOCAL_ADDRESS
 const MSSQL_USER = process.env.MSSQL_USER
 const MSSQL_PASS_WORD = process.env.MSSQL_PASS_WORD
 const MSSQL_DATABASE = process.env.MSSQL_DATABASE
-const mssqlConfig = {
+const MSSQL_MALTRANS_DATABASE = process.env.MSSQL_MALTRANS_DATABASE
+const mssqlUsersConfig = {
     user: MSSQL_USER,
     password: MSSQL_PASS_WORD,
     database: MSSQL_DATABASE,
@@ -28,10 +29,45 @@ const mssqlConfig = {
     }
 };
 
+const mssqlTransactionConfig = {
+    user: MSSQL_USER,
+    password: MSSQL_PASS_WORD,
+    database: MSSQL_MALTRANS_DATABASE,
+    server: MSSQL_LOCAL_ADDRESS,
+    port: 1433,
+    pool: {
+          max: 1000,
+          min: 0,
+          idleTimeoutMillis: 30000,
+          acquireTimeoutMillis: 30000,
+          createTimeoutMillis: 30000,
+          destroyTimeoutMillis: 30000,
+          reapIntervalMillis: 30000,
+          createRetryIntervalMillis: 30000,
+    },
+    options: {
+          enableArithAbort: true,
+          encrypt: false
+    }
+};
+
 // create SQL connection
 const getSQL = async () => {
     try{
-        const pool = await mssql.connect(mssqlConfig)
+        const pool = await mssql.connect(mssqlUsersConfig)
+        .then(pool => {
+            return pool
+        })
+        return pool
+    }catch(err){
+        return
+    } 
+}
+
+// create transaction SQL connection
+const getTransSQL = async () => {
+    try{
+        const pool = await mssql.connect(mssqlTransactionConfig)
         .then(pool => {
             return pool
         })
@@ -53,5 +89,6 @@ const getTransaction = async (pool) => {
 
 module.exports = {
     getSQL,
-    getTransaction
+    getTransaction,
+    getTransSQL
 };

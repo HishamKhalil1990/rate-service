@@ -8,6 +8,9 @@ const fs = require('fs')
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const USERS_TABLE = process.env.USERS_TABLE
 const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
+const MSSQL_MALTRANS_SUBMIT_PROCEDURE = process.env.MSSQL_MALTRANS_SUBMIT_PROCEDURE
+const MALTRANS_HISTORY_TABLE = process.env.MALTRANS_HISTORY_TABLE
+const MALTRANS_SUBMIT_TABLE = process.env.MALTRANS_SUBMIT_TABLE
 
 const fetchRates = async() => {
     try{
@@ -121,10 +124,152 @@ const savePdf = (fileStr,fileName) => {
     });
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+const convertTime = (datetime) => {
+    let date = new Date(datetime)
+    date = date.toISOString()
+    return date
+}
+
+const executeTransSql = async (type,info) => {
+    return new Promise((resolve,reject) => {
+        const start = async () => {
+            try{
+                const pool = await sql.getTransSQL()
+                if(pool){
+                    switch(type){
+                        case 'send':
+                            startTransaction(info,pool).then(() => {
+                                pool.close();
+                                resolve()
+                            })
+                            .catch((err) => {
+                                pool.close();
+                                reject()
+                            })
+                            break
+                        case 'getData':
+                            const data = await getSavedData(0,info,pool)
+                            if(data){
+                                pool.close();
+                                resolve(data)
+                            }else{
+                                pool.close();
+                                reject()
+                            }
+                            break
+                        case 'getHistoryData':
+                            const histData = await getSavedData(1,info,pool)
+                            if(histData){
+                                pool.close();
+                                resolve(histData)
+                            }else{
+                                pool.close();
+                                reject()
+                            }
+                            break
+                        default:
+                            break
+                    }
+                }else{
+                    reject()
+                }
+            }catch(err){
+                console.log(err)
+                reject()
+            }
+        }
+        start()
+    })
+}
+
+const startTransaction = async (data,pool) => {
+    const transaction = await sql.getTransaction(pool);
+    return new Promise((resolve,reject) => {
+        try{
+            transaction.begin((err) => {
+                if(err){
+                    console.log("pool",err)
+                    reject()
+                }
+                pool.request()
+                .input("BL",data.BL)
+                .input("customCenter",data.customCenter)
+                .input("clearanceNo",data.clearanceNo)
+                .input("clearanceDate",data.clearanceDate)
+                .input("healthPath",data.healthPath)
+                .input("customPath",data.customPath)
+                .input("agriPath",data.agriPath)
+                .input("customeInsurance",data.customeInsurance)
+                .input("clearanceFinish",data.clearanceFinish)
+                .input("requiredAction",data.requiredAction)
+                .input("customeDeclaration",data.customeDeclaration)
+                .input("clearanceBill",data.clearanceBill)
+                .input("samplingModel",data.samplingModel)
+                .input("dataResults",data.dataResults)
+                .input("UserName",data.UserName)
+                .execute(MSSQL_MALTRANS_SUBMIT_PROCEDURE,(err,result) => {
+                    if(err){
+                        console.log('excute',err)
+                        reject()
+                    }
+                    transaction.commit((err) => {
+                        if(err){
+                            console.log('transaction error : ',err)
+                            reject()
+                        }
+                        console.log("Transaction committed.");
+                        resolve();
+                    });
+                })
+            })
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const getSavedData = async (type,bl,pool) => {
+    const statments = [MALTRANS_SUBMIT_TABLE,MALTRANS_HISTORY_TABLE]
+    const transaction = await sql.getTransaction(pool);
+    return new Promise((resolve,reject) => {
+        try{
+            transaction.begin((err) => {
+                if(err){
+                    console.log("pool",err)
+                    reject()
+                }
+                pool.request()
+                .input("BL",bl)
+                .execute(statments[type],(err,result) => {
+                    if(err){
+                        console.log('excute',err)
+                        reject()
+                    }
+                    transaction.commit((err) => {
+                        if(err){
+                            console.log('transaction error : ',err)
+                            reject()
+                        }
+                        console.log("Transaction committed.");
+                        resolve(result.recordset);
+                    });
+                })
+            })
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
 module.exports = {
     fetchRates,
     authentication,
     create,
     getUser,
-    savePdf
+    savePdf,
+    executeTransSql,
+    convertTime
 }
