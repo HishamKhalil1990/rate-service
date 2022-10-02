@@ -7,7 +7,7 @@ const fs = require('fs')
 const sendEmail = require('./email')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
-const USERS_TABLE = process.env.USERS_TABLE
+const MALTRANS_USERS_TABLE = process.env.MALTRANS_USERS_TABLE
 const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
 const MSSQL_MALTRANS_SUBMIT_PROCEDURE = process.env.MSSQL_MALTRANS_SUBMIT_PROCEDURE
 const MALTRANS_HISTORY_TABLE = process.env.MALTRANS_HISTORY_TABLE
@@ -97,9 +97,9 @@ const authentication = (req,res,next) => {
 
 const getUser = async (username,password) => {
     try{
-        const pool = await sql.getSQL();
+        const pool = await sql.getTransSQL();
         if(pool){
-            const user = await pool.request().query(`select * from ${USERS_TABLE} where Username = '${username}' and Password = '${password}'`)
+            const user = await pool.request().query(`select * from ${MALTRANS_USERS_TABLE} where username = '${username}' and password = '${password}'`)
             .then(result => {
                 pool.close();
                 return result.recordset;
