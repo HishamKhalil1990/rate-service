@@ -4,6 +4,7 @@ const prisma = require('./prisma')
 const jwt = require("jsonwebtoken");
 const sql = require('./sql')
 const fs = require('fs')
+const sendEmail = require('./email')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const USERS_TABLE = process.env.USERS_TABLE
@@ -264,6 +265,159 @@ const getSavedData = async (type,bl,pool) => {
     })
 }
 
+const getAttachment = (data) => {
+    let attach = `<ul>`
+    if(data.customeDeclaration != 'no file'){
+        attach += `<li><a href="${data.customeDeclaration}">البيان الجمركي</a></li>`
+    }
+    if(data.clearanceBill != 'no file'){
+        attach += `<li><a href="${data.clearanceBill}">فواتير التخليص</a></li>`
+    }
+    if(data.samplingModel != 'no file'){
+        attach += `<li><a href="${data.samplingModel}">نموذج سحب العينات</a></li>`
+    }
+    if(data.dataResults != 'no file'){
+        attach += `<li><a href="${data.dataResults}">نتائج البيانات والانجازات</a></li>`
+    }
+    attach += `</ul>`
+    return attach
+}
+
+const sendMaltransEmail = async(billNo) => {
+
+    let data = await executeTransSql('getData',billNo)
+    data = data[0]
+    const attachment = getAttachment(data)
+    const date = new Date(data.clearanceDate).toISOString().split('T')[0]
+    const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" lang="en">
+    <head>
+        <link rel="stylesheet" type="text/css" hs-webfonts="true" href="https://fonts.googleapis.com/css?family=Lato|Lato:i,b,bi">
+        <title>Email template</title>
+        <meta property="og:title" content="Email template"> 
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style type="text/css">
+            table{
+                border: 3px solid black;
+                border-collapse: collapse;
+            }
+            th{
+                text-align: center;
+                padding: 20px 10px 20px 10px;
+            }
+            td{
+                min-width: 125px;
+                text-align: right;
+                padding: 10px;
+            }
+            div{
+                min-width: 125px;
+                text-align:center; 
+                border: 1px solid black;
+                padding: 0px 5px 0px 5px;
+            }
+            li{
+                padding: 5px;
+            }
+        </style>  
+    </head>
+    <body style="width: 100%; margin: auto 0; padding:0; font-family:Lato, sans-serif; font-size:18px; word-break:break-word">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="6">
+                        ${data.BL} بوليصة رقم
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div>
+                            ${data.customCenter}
+                        </div>
+                    </td>
+                    <td>
+                        المركز الجمركي
+                    </td>
+                    <td>
+                        <div>
+                            ${data.clearanceNo}
+                        </div>
+                    </td>
+                    <td>
+                        رقم البيان الجمركي
+                    </td>
+                    <td>
+                        <div>
+                            ${date}
+                        </div>
+                    </td>
+                    <td>
+                        تاريخ البيان الجمركي
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>
+                            ${data.healthPath}
+                        </div>
+                    </td>
+                    <td>
+                        المسرب الصحي
+                    </td>
+                    <td>
+                        <div>
+                            ${data.customPath}
+                        </div>
+                    </td>
+                    <td>
+                        المسرب الجمركي
+                    </td>
+                    <td>
+                        <div>
+                            ${data.agriPath}
+                        </div>
+                    </td>
+                    <td>
+                        المسرب الزراعي
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>
+                            ${data.customeInsurance}
+                        </div>
+                    </td>
+                    <td>
+                        التأمينات الجمركية
+                    </td>
+                    <td>
+                        <div>
+                            ${data.clearanceFinish}
+                        </div>
+                    </td>
+                    <td>
+                        إنجاز البيان
+                    </td>
+                    <td>
+                        <div>
+                            ${data.requiredAction}
+                        </div>
+                    </td>
+                    <td>
+                        الإجراء المطلوب
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ${attachment}
+    </body>
+    </html>`
+    sendEmail(data.BL,html)
+}
+
 module.exports = {
     fetchRates,
     authentication,
@@ -271,5 +425,6 @@ module.exports = {
     getUser,
     savePdf,
     executeTransSql,
-    convertTime
+    convertTime,
+    sendMaltransEmail
 }
