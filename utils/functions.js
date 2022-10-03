@@ -289,7 +289,12 @@ const sendMaltransEmail = async(billNo) => {
     data = data[0]
     const attachment = getAttachment(data)
     const date = new Date(data.clearanceDate).toISOString().split('T')[0]
-    const date2 = new Date(data.clearanceFinish).toISOString().split('T')[0]
+    let date2
+    if(data.requiredAction == "إنجاز"){
+        date2 = new Date(data.clearanceFinish).toISOString().split('T')[0]
+    }else{
+        date2 = "غير منجز"
+    }
     const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" lang="en">
     <head>
         <link rel="stylesheet" type="text/css" hs-webfonts="true" href="https://fonts.googleapis.com/css?family=Lato|Lato:i,b,bi">

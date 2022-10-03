@@ -129,7 +129,7 @@ const saveMaltData = async(req,res) => {
         mappedData['customPath'] = data.customPath
         mappedData['agriPath'] = data.agriPath
         mappedData['customeInsurance'] = data.customeInsurance
-        mappedData['clearanceFinish'] = functions.convertTime(data.clearanceFinish)
+        mappedData['clearanceFinish'] = data.requiredAction == "إنجاز"? functions.convertTime(data.clearanceFinish) : ""
         mappedData['requiredAction'] = data.requiredAction
         mappedData['UserName'] = data.UserName
         functions.executeTransSql('send',mappedData)
