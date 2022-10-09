@@ -209,6 +209,7 @@ const startTransaction = async (data,pool) => {
                 .input("samplingModel",data.samplingModel)
                 .input("dataResults",data.dataResults)
                 .input("UserName",data.UserName)
+                .input("DocDone",data.docDone)
                 .execute(MSSQL_MALTRANS_SUBMIT_PROCEDURE,(err,result) => {
                     if(err){
                         console.log('excute',err)
@@ -290,7 +291,7 @@ const sendMaltransEmail = async(billNo) => {
     const attachment = getAttachment(data)
     const date = new Date(data.clearanceDate).toISOString().split('T')[0]
     let date2
-    if(data.requiredAction == "إنجاز"){
+    if((data.requiredAction == "إنجاز") || (data.DocDone == "منجز")){
         date2 = new Date(data.clearanceFinish).toISOString().split('T')[0]
     }else{
         date2 = "غير منجز"
