@@ -98,26 +98,26 @@ const saveMaltData = async(req,res) => {
     let mappedData = {}
     try{
         if(data['FileOneName'] != ""){
-            functions.savePdf(data['FileOne'],data['FileOneName'])
-            mappedData['customeDeclaration'] = PDF_FOLDER_PATH + "/" + data['FileOneName']
+            functions.savePdf(data['FileOne'],(data.BL + "-" + data['FileOneName']))
+            mappedData['customeDeclaration'] = PDF_FOLDER_PATH + "/" + data.BL + "-" + data['FileOneName']
         }else{
             mappedData['customeDeclaration'] = 'no file'
         }
         if(data['FileTwoName'] != ""){
-            functions.savePdf(data['FileTwo'],data['FileTwoName'])
-            mappedData['clearanceBill'] = PDF_FOLDER_PATH + "/" + data['FileTwoName']
+            functions.savePdf(data['FileTwo'],(data.BL + "-" + data['FileTwoName']))
+            mappedData['clearanceBill'] = PDF_FOLDER_PATH + "/" + data.BL + "-" + data['FileTwoName']
         }else{
             mappedData['clearanceBill'] = 'no file'
         }
         if(data['FileThreeName'] != ""){
-            functions.savePdf(data['FileThree'],data['FileThreeName'])
-            mappedData['samplingModel'] = PDF_FOLDER_PATH + "/" + data['FileThreeName']
+            functions.savePdf(data['FileThree'],(data.BL + "-" + data['FileThreeName']))
+            mappedData['samplingModel'] = PDF_FOLDER_PATH + "/" + data.BL + "-" + data['FileThreeName']
         }else{
             mappedData['samplingModel'] = 'no file'
         }
         if(data['FileFourName'] != ""){
-            functions.savePdf(data['FileFour'],data['FileFourName'])
-            mappedData['dataResults'] = PDF_FOLDER_PATH + "/" + data['FileFourName']
+            functions.savePdf(data['FileFour'],(data.BL + "-" + data['FileFourName']))
+            mappedData['dataResults'] = PDF_FOLDER_PATH + "/" + data.BL + "-" + data['FileFourName']
         }else{
             mappedData['dataResults'] = 'no file'
         }
