@@ -1,7 +1,9 @@
 require('dotenv').config()
 const express = require('express')
 const multer = require('multer');
-const upload = multer();
+const upload = multer({
+    limits: { fieldSize: 52428800 }
+  });
 const router = express.Router()
 const controller = require('../controller/mainController')
 const functions = require('../utils/functions')
