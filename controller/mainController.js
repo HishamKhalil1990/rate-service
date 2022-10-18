@@ -195,7 +195,7 @@ const getContainerInfo = async(req,res) => {
 const saveContainerInfo = async(req,res) => {
     const info = req.body
     const mappedInfo = {
-        containerNo:info.containerNO,
+        containerNo:info.containerNo,
         bL:info.bL,
         driverName:info.driverName != ""? info.driverName : "غير مدخل",
         driverNumber:info.driverNumber != ""? info.driverNumber : "غير مدخل",
