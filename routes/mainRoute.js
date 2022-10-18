@@ -14,5 +14,6 @@ router.post('/bill-of-lading',authentication,controller.billOfLadingInfo)
 router.post('/check-maltrans-user', controller.checkMaltransUser)
 router.post('/save-maltrans-data',authentication ,upload.array(), controller.saveMaltData)
 router.post('/get-container-info',authentication,controller.getContainerInfo)
+router.post('/save-container-info',authentication,controller.saveContainerInfo)
 
 module.exports = router

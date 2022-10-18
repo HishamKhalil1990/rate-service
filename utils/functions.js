@@ -13,6 +13,7 @@ const MSSQL_MALTRANS_SUBMIT_PROCEDURE = process.env.MSSQL_MALTRANS_SUBMIT_PROCED
 const MALTRANS_HISTORY_TABLE = process.env.MALTRANS_HISTORY_TABLE
 const MALTRANS_SUBMIT_TABLE = process.env.MALTRANS_SUBMIT_TABLE
 const MALTRANS_GET_CONTAINER_INFO_PROCEDURE = process.env.MALTRANS_GET_CONTAINER_INFO_PROCEDURE
+const MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE = process.env.MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE
 
 const fetchRates = async() => {
     try{
@@ -179,6 +180,16 @@ const executeTransSql = async (type,info) => {
                                 pool.close();
                                 reject()
                             }
+                            break
+                        case 'saveContainerInfo':
+                            startContainerTransaction(info,pool).then(() => {
+                                pool.close();
+                                resolve()
+                            })
+                            .catch((err) => {
+                                pool.close();
+                                reject()
+                            })
                             break
                         default:
                             break
@@ -460,6 +471,47 @@ const getContainerData = async (bL,containerNo,pool) => {
                         }
                         console.log("Transaction committed.");
                         resolve(result.recordset);
+                    });
+                })
+            })
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const startContainerTransaction = async (data,pool) => {
+    console.log(data)
+    const transaction = await sql.getTransaction(pool);
+    return new Promise((resolve,reject) => {
+        try{
+            transaction.begin((err) => {
+                if(err){
+                    console.log("pool",err)
+                    reject()
+                }
+                pool.request()
+                .input("BL",data.bL)
+                .input("ContainerID",data.containerNo)
+                .input("DriverName",data.driverName)
+                .input("DriverMobile",data.driverNumber)
+                .input("TruckNo",data.truckNumber)
+                .input("ShippingCompany",data.shippingName)
+                .input("Notes",data.note)
+                .input("UserName",data.username)
+                .execute(MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE,(err,result) => {
+                    if(err){
+                        console.log('excute',err)
+                        reject()
+                    }
+                    transaction.commit((err) => {
+                        if(err){
+                            console.log('transaction error : ',err)
+                            reject()
+                        }
+                        console.log("Transaction committed.");
+                        resolve();
                     });
                 })
             })

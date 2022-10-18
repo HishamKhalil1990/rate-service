@@ -192,10 +192,46 @@ const getContainerInfo = async(req,res) => {
 
 }
 
+const saveContainerInfo = async(req,res) => {
+    const info = req.body
+    const mappedInfo = {
+        containerNo:info.containerNO,
+        bL:info.bL,
+        driverName:info.driverName != ""? info.driverName : "غير مدخل",
+        driverNumber:info.driverNumber != ""? info.driverNumber : "غير مدخل",
+        truckNumber:info.truckNumber != ""? info.truckNumber : "غير مدخل",
+        shippingName:info.shippingName != ""? info.shippingName : "غير مدخل",
+        note:info.note != ""? info.note : "غير مدخل",
+        username:info.username
+    }
+    try{
+        functions.executeTransSql('saveContainerInfo',mappedInfo)
+        .then(() => {
+            res.send({
+                status: 'success',
+                msg: 'Submit is Done',
+            })
+        })
+        .catch(() => {
+            res.send({
+                status: 'faild',
+                msg: 'server internal error!, could not get container info. please try again'
+            })
+        })
+    }catch(err){
+        res.send({
+            status: 'faild',
+            msg: 'server internal error!, could not get container info. please try again'
+        })
+    }
+
+}
+
 module.exports = {
     supervisorOrders,
     billOfLadingInfo,
     checkMaltransUser,
     saveMaltData,
-    getContainerInfo
+    getContainerInfo,
+    saveContainerInfo
 }
