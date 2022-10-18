@@ -142,7 +142,7 @@ const saveMaltData = async(req,res) => {
                     msg: 'Submit is Done',
                     data:results
                 })
-                functions.sendMaltransEmail(data.BL)
+                // functions.sendMaltransEmail(data.BL)
             })
             .catch(() => {
                 res.send({
@@ -165,9 +165,37 @@ const saveMaltData = async(req,res) => {
     }
 }
 
+const getContainerInfo = async(req,res) => {
+    const { containerNo,bL } = req.body
+    const info = { containerNo,bL }
+    try{
+        functions.executeTransSql('getContainerData',info)
+        .then(result => {
+            res.send({
+                status: 'success',
+                msg: "success",
+                data:result
+            })
+        })
+        .catch(() => {
+            res.send({
+                status: 'faild',
+                msg: 'server internal error!, could not get container info. please try again'
+            })
+        })
+    }catch(err){
+        res.send({
+            status: 'faild',
+            msg: 'server internal error!, could not get container info. please try again'
+        })
+    }
+
+}
+
 module.exports = {
     supervisorOrders,
     billOfLadingInfo,
     checkMaltransUser,
-    saveMaltData
+    saveMaltData,
+    getContainerInfo
 }
