@@ -482,7 +482,6 @@ const getContainerData = async (bL,containerNo,pool) => {
 }
 
 const startContainerTransaction = async (data,pool) => {
-    console.log(data)
     const transaction = await sql.getTransaction(pool);
     return new Promise((resolve,reject) => {
         try{
