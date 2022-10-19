@@ -133,6 +133,7 @@ const saveMaltData = async(req,res) => {
         mappedData['requiredAction'] = data.requiredAction
         mappedData['UserName'] = data.UserName
         mappedData['docDone'] = data.docDone
+        mappedData['notes'] = data.notes != ""? data.notes : "لا يوجد ملاحظات"
         functions.executeTransSql('send',mappedData)
         .then(() => {
             functions.executeTransSql('getHistoryData',data.BL)
