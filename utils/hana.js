@@ -8,7 +8,7 @@ const HANA_PASSWORD = process.env.HANA_PASSWORD;
 const HANA_DATABASE = process.env.HANA_DATABASE;
 const HANA_SUPERVISOR_OREDERS_PROCEDURE = process.env.HANA_SUPERVISOR_OREDERS_PROCEDURE;
 const HANA_MALTRANS_DATABASE = process.env.HANA_MALTRANS_DATABASE;
-const HANA_MALTRANS_TABLE = process.env.HANA_MALTRANS_TABLE;
+const HANA_MALTRANS_DATA_PROCEDURE = process.env.HANA_MALTRANS_DATA_PROCEDURE;
 
 const hanaConfig = {
   serverNode: `${HANA_HOST}:30015`,
@@ -25,9 +25,8 @@ const getSupervisorOrders = async (cardcode) => {
 };
 
 const getBillOfLadingInfo = async (billNo) => {
-  const statment = `Select * from "${HANA_MALTRANS_DATABASE}"."${HANA_MALTRANS_TABLE}" where BL = ?`
-  const values = [billNo]
-  return executeStatement(statment,values)
+  const procedureStatment = `CALL "${HANA_MALTRANS_DATABASE}"."${HANA_MALTRANS_DATA_PROCEDURE}" ('${billNo}')`;
+  return execute(procedureStatment);
 }
 
 const execute = async (procdure) => {
