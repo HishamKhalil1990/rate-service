@@ -96,6 +96,7 @@ const checkMaltransUser = async(req,res) => {
 const saveMaltData = async(req,res) => {
     let data = req.body
     let mappedData = {}
+    data.notes = data.notes == 'undefined'? "" : data.notes
     try{
         if(data['FileOneName'] != ""){
             functions.savePdf(data['FileOne'],(data.BL + "-" + data['FileOneName']))
