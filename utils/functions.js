@@ -440,6 +440,16 @@ const sendMaltransEmail = async(billNo) => {
                         الإجراء المطلوب
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <div>
+                            ${data.notes}
+                        </div>
+                    </td>
+                    <td>
+                        الملاحظات
+                    </td>
+                </tr>
             </tbody>
         </table>
         ${attachment}

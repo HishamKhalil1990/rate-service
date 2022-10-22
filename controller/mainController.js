@@ -144,7 +144,7 @@ const saveMaltData = async(req,res) => {
                     msg: 'Submit is Done',
                     data:results
                 })
-                // functions.sendMaltransEmail(data.BL)
+                functions.sendMaltransEmail(data.BL)
             })
             .catch(() => {
                 res.send({
