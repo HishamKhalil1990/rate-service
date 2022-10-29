@@ -129,6 +129,7 @@ const saveMaltData = async(req,res) => {
         mappedData['healthPath'] = data.healthPath
         mappedData['customPath'] = data.customPath
         mappedData['agriPath'] = data.agriPath
+        mappedData['customTerms'] = data.customTerms
         mappedData['customeInsurance'] = data.customeInsurance
         mappedData['clearanceFinish'] = (data.requiredAction == "إنجاز") || (data.docDone == "منجز")? functions.convertTime(data.clearanceFinish) : ""
         mappedData['requiredAction'] = data.requiredAction
