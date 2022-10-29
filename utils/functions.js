@@ -233,6 +233,7 @@ const startTransaction = async (data,pool) => {
                 .input("UserName",data.UserName)
                 .input("DocDone",data.docDone)
                 .input("Notes",data.notes)
+                .input("customTerms",data.customTerms)
                 .execute(MSSQL_MALTRANS_SUBMIT_PROCEDURE,(err,result) => {
                     if(err){
                         console.log('excute',err)
