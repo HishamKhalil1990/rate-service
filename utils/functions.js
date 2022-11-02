@@ -234,6 +234,9 @@ const startTransaction = async (data,pool) => {
                 .input("DocDone",data.docDone)
                 .input("Notes",data.notes)
                 .input("customTerms",data.customTerms)
+                .input("Ins215",data.ins215)
+                .input("Ins250",data.ins250)
+                .input("Ins251",data.ins215)
                 .execute(MSSQL_MALTRANS_SUBMIT_PROCEDURE,(err,result) => {
                     if(err){
                         console.log('excute',err)
@@ -418,11 +421,11 @@ const sendMaltransEmail = async(billNo) => {
                 <tr>
                     <td>
                         <div>
-                            ${data.customeInsurance}
+                            ${data.notes}
                         </div>
                     </td>
                     <td>
-                        التأمينات الجمركية
+                        الملاحظات
                     </td>
                     <td>
                         <div>
@@ -444,11 +447,27 @@ const sendMaltransEmail = async(billNo) => {
                 <tr>
                     <td>
                         <div>
-                            ${data.notes}
+                            ${data.Ins215}
                         </div>
                     </td>
                     <td>
-                        الملاحظات
+                        بدل وثائق غير مصدقة مستوفاة بالتأمين : 215
+                    </td>
+                    <td>
+                        <div>
+                            ${data.Ins215}
+                        </div>
+                    </td>
+                    <td>
+                        250: رسم موحد بأمانة
+                    </td>
+                    <td>
+                        <div>
+                            ${data.Ins215}
+                        </div>
+                    </td>
+                    <td>
+                        251: ضريبة مبيعات عامة نسبية بأمانة
                     </td>
                 </tr>
             </tbody>

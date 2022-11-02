@@ -129,8 +129,11 @@ const saveMaltData = async(req,res) => {
         mappedData['healthPath'] = data.healthPath
         mappedData['customPath'] = data.customPath
         mappedData['agriPath'] = data.agriPath
-        mappedData['customTerms'] = data.customTerms
-        mappedData['customeInsurance'] = data.customeInsurance
+        mappedData['customTerms'] = "تامينات جمركية"
+        mappedData['ins215'] = data.ins215
+        mappedData['ins250'] = data.ins250
+        mappedData['ins251'] = data.ins251
+        mappedData['customeInsurance'] = parseFloat(data.ins215) + parseFloat(data.ins250) + parseFloat(data.ins251)
         mappedData['clearanceFinish'] = (data.requiredAction == "إنجاز") || (data.docDone == "منجز")? functions.convertTime(data.clearanceFinish) : ""
         mappedData['requiredAction'] = data.requiredAction
         mappedData['UserName'] = data.UserName
