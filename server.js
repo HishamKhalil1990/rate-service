@@ -3,9 +3,9 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const functions = require('./utils/functions')
 const mainRouter = require('./routes/mainRoute')
 const supervisorRouter = require('./routes/supervisorRoute')
+const trucksRouter = require('./routes/trucksRoute')
 
 const PORT = process.env.PORT
 
@@ -22,10 +22,4 @@ app.listen(PORT, (err) => {
 
 app.use('/',mainRouter)
 app.use('/mobile',supervisorRouter)
-
-// const startFetching = async() => {
-//     const msg = await functions.fetchRates()
-//     console.log(msg)
-// }
-
-// startFetching()
+app.use('/truck',trucksRouter)

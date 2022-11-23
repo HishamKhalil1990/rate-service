@@ -14,6 +14,8 @@ const MALTRANS_HISTORY_TABLE = process.env.MALTRANS_HISTORY_TABLE
 const MALTRANS_SUBMIT_TABLE = process.env.MALTRANS_SUBMIT_TABLE
 const MALTRANS_GET_CONTAINER_INFO_PROCEDURE = process.env.MALTRANS_GET_CONTAINER_INFO_PROCEDURE
 const MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE = process.env.MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE
+const MSSQL_TRUCK_INFO = process.env.MSSQL_TRUCK_INFO
+const MSSQL_TRUCK_STATUS = process.env.MSSQL_TRUCK_STATUS
 
 const fetchRates = async() => {
     try{
@@ -183,6 +185,26 @@ const executeTransSql = async (type,info) => {
                             break
                         case 'saveContainerInfo':
                             startContainerTransaction(info,pool).then(() => {
+                                pool.close();
+                                resolve()
+                            })
+                            .catch((err) => {
+                                pool.close();
+                                reject()
+                            })
+                            break
+                        case 'truckInfo':
+                            getTruckInfo(info,pool).then((data) => {
+                                pool.close();
+                                resolve(data)
+                            })
+                            .catch((err) => {
+                                pool.close();
+                                reject()
+                            })
+                            break
+                        case 'saveTruckStatus':
+                            saveTruckStatus(info,pool).then((data) => {
                                 pool.close();
                                 resolve()
                             })
@@ -531,6 +553,73 @@ const startContainerTransaction = async (data,pool) => {
                 .input("Notes",data.note)
                 .input("UserName",data.username)
                 .execute(MALTRANS_SAVE_CONTAINER_INFO_PROCEDURE,(err,result) => {
+                    if(err){
+                        console.log('excute',err)
+                        reject()
+                    }
+                    transaction.commit((err) => {
+                        if(err){
+                            console.log('transaction error : ',err)
+                            reject()
+                        }
+                        console.log("Transaction committed.");
+                        resolve();
+                    });
+                })
+            })
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const getTruckInfo = async (data,pool) => {
+    const transaction = await sql.getTransaction(pool);
+    return new Promise((resolve,reject) => {
+        try{
+            transaction.begin((err) => {
+                if(err){
+                    console.log("pool",err)
+                    reject()
+                }
+                pool.request()
+                .input("TruckNo",data.truckNo)
+                .execute(MSSQL_TRUCK_INFO,(err,result) => {
+                    if(err){
+                        console.log('excute',err)
+                        reject()
+                    }
+                    transaction.commit((err) => {
+                        if(err){
+                            console.log('transaction error : ',err)
+                            reject()
+                        }
+                        console.log("Transaction committed.");
+                        resolve(result.recordset);
+                    });
+                })
+            })
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const saveTruckStatus = async (data,pool) => {
+    const transaction = await sql.getTransaction(pool);
+    return new Promise((resolve,reject) => {
+        try{
+            transaction.begin((err) => {
+                if(err){
+                    console.log("pool",err)
+                    reject()
+                }
+                pool.request()
+                .input("Truckno",data.truckNo)
+                .input("Status",data.status)
+                .execute(MSSQL_TRUCK_STATUS,(err,result) => {
                     if(err){
                         console.log('excute',err)
                         reject()
