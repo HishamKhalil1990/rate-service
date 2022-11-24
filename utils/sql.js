@@ -68,7 +68,7 @@ const getSQL = async () => {
 const getTransSQL = async () => {
     try{
         const pool = await mssql.connect(mssqlTransactionConfig)
-        .then(pool => {
+        .then(pool => {          
             return pool
         })
         return pool

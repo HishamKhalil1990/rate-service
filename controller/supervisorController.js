@@ -21,6 +21,7 @@ async function getSupervisorUsers(req,res){
     const client = await sql.getSQL()
     const getSupervisorUsers = 'select * from supervisorUsers';
     client.request().query(getSupervisorUsers).then(data => {
+        client.close()
         res.send(data.recordset)
     }).catch(err => {
         console.log(err)
@@ -111,6 +112,7 @@ async function saveSupervisorUser(req,res){
                     })
                 })
             }
+            client.close()
         }).catch(err => {
             console.log(err)
             res.send({
@@ -143,6 +145,7 @@ async function updateSupervisorUser(req,res){
         }
     }
     client.request().query(updateSupervisorUser).then(data=>{
+        client.close()
         res.send({
             status: 'success',
         });
@@ -160,6 +163,7 @@ async function deleteSupervisorUser(req,res){
     const {username} = req.body;
     const deleteSupervisorUser = `delete from supervisorUsers where username = '${username}'`
     client.request().query(deleteSupervisorUser).then(data=>{
+        client.close()
         res.send({
             status: 'success',
         });
@@ -177,6 +181,7 @@ async function checkSupervisorUser(req,res){
     const {username,password} = req.body;
     const checkSupervisorUser = `select * from supervisorUsers where username = '${username}'`;
     client.request().query(checkSupervisorUser).then(data => {
+        client.close()
         if(data.recordset.length > 0){
             if(data.recordset[0].pass == password){
                 res.send({
