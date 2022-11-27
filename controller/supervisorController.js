@@ -7,7 +7,10 @@ async function getSupervisorOrders(req,res){
         const {cardcode} = req.params
         hana.getSupervisorOrders(cardcode)
         .then(results => {
-            res.send(results)
+            res.send({
+                msg:"success",
+                orders:results
+            })
         })
         .catch(() => {
             res.send({msg : "error"})
