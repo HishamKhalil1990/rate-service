@@ -386,7 +386,7 @@ const sendMaltransEmail = async(billNo) => {
         <table>
             <thead>
                 <tr>
-                    <th colspan="6">
+                    <th colspan="8">
                         ${data.BL} بوليصة رقم
                     </th>
                 </tr>
@@ -417,6 +417,14 @@ const sendMaltransEmail = async(billNo) => {
                     <td>
                         تاريخ البيان الجمركي
                     </td>
+                    <td>
+                        <div>
+                            ${data.operationNo}
+                        </div>
+                    </td>
+                    <td>
+                        رقم العملية
+                    </td>
                 </tr>
                 <tr>
                     <td>
@@ -442,6 +450,14 @@ const sendMaltransEmail = async(billNo) => {
                     </td>
                     <td>
                         المسرب الزراعي
+                    </td>
+                    <td>
+                        <div>
+                            ${data.energyPath}
+                        </div>
+                    </td>
+                    <td>
+                        مسرب الطاقة
                     </td>
                 </tr>
                 <tr>
@@ -469,8 +485,6 @@ const sendMaltransEmail = async(billNo) => {
                     <td>
                         الإجراء المطلوب
                     </td>
-                </tr>
-                <tr>
                     <td>
                         <div>
                             ${data.Ins215}
@@ -479,9 +493,11 @@ const sendMaltransEmail = async(billNo) => {
                     <td>
                         بدل وثائق غير مصدقة مستوفاة بالتأمين : 215
                     </td>
+                </tr>
+                <tr>
                     <td>
                         <div>
-                            ${data.Ins215}
+                            ${data.Ins250}
                         </div>
                     </td>
                     <td>
@@ -489,11 +505,27 @@ const sendMaltransEmail = async(billNo) => {
                     </td>
                     <td>
                         <div>
-                            ${data.Ins215}
+                            ${data.Ins251}
                         </div>
                     </td>
                     <td>
                         251: ضريبة مبيعات عامة نسبية بأمانة
+                    </td>
+                    <td>
+                        <div>
+                            ${data.Ins265}
+                        </div>
+                    </td>
+                    <td>
+                        265: تأمين بدل خدمات على المستودات المعفاة %1
+                    </td>
+                    <td>
+                        <div>
+                            ${data.Ins270}
+                        </div>
+                    </td>
+                    <td>
+                        270: تأمين بدل خدمات على بضائع خاضعة للرسوم %5
                     </td>
                 </tr>
             </tbody>
