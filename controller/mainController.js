@@ -126,13 +126,17 @@ const saveMaltData = async(req,res) => {
         mappedData['customCenter'] = data.customCenter
         mappedData['clearanceNo'] = data.clearanceNo
         mappedData['clearanceDate'] = functions.convertTime(data.clearanceDate)
+        mappedData['operationNo'] = data.operationNo
         mappedData['healthPath'] = data.healthPath
         mappedData['customPath'] = data.customPath
         mappedData['agriPath'] = data.agriPath
+        mappedData['energyPath'] = data.energyPath
         mappedData['customTerms'] = "تامينات جمركية"
         mappedData['ins215'] = data.ins215
         mappedData['ins250'] = data.ins250
         mappedData['ins251'] = data.ins251
+        mappedData['ins265'] = data.ins265
+        mappedData['ins270'] = data.ins270
         mappedData['customeInsurance'] = parseFloat(data.ins215) + parseFloat(data.ins250) + parseFloat(data.ins251)
         mappedData['clearanceFinish'] = (data.requiredAction == "إنجاز") || (data.docDone == "منجز")? functions.convertTime(data.clearanceFinish) : ""
         mappedData['requiredAction'] = data.requiredAction
