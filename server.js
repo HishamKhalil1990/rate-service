@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const mainRouter = require('./routes/mainRoute')
 const supervisorRouter = require('./routes/supervisorRoute')
 const trucksRouter = require('./routes/trucksRoute')
+const rateRouter = require('./routes/rateRoute')
 
 const PORT = process.env.PORT
 
@@ -23,3 +24,4 @@ app.listen(PORT, (err) => {
 app.use('/',mainRouter)
 app.use('/mobile',supervisorRouter)
 app.use('/truck',trucksRouter)
+app.use('/rate',rateRouter)
