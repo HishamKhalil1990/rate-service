@@ -9,6 +9,7 @@ const HANA_DATABASE = process.env.HANA_DATABASE;
 const HANA_SUPERVISOR_OREDERS_PROCEDURE = process.env.HANA_SUPERVISOR_OREDERS_PROCEDURE;
 const HANA_MALTRANS_DATABASE = process.env.HANA_MALTRANS_DATABASE;
 const HANA_MALTRANS_DATA_PROCEDURE = process.env.HANA_MALTRANS_DATA_PROCEDURE;
+const HANA_WAREHOUSENAME_TABLE = process.env.HANA_WAREHOUSENAME_TABLE;
 
 const hanaConfig = {
   serverNode: `${HANA_HOST}:30015`,
@@ -28,6 +29,11 @@ const getBillOfLadingInfo = async (billNo) => {
   const procedureStatment = `CALL "${HANA_MALTRANS_DATABASE}"."${HANA_MALTRANS_DATA_PROCEDURE}" ('${billNo}')`;
   return execute(procedureStatment);
 }
+
+const getWhsNames = async () => {
+  const procedureStatment = `SELECT * FROM "${HANA_DATABASE}"."${HANA_WAREHOUSENAME_TABLE}"`;
+  return executeStatement(procedureStatment);
+};
 
 const execute = async (procdure) => {
   return new Promise((resolve, reject) => {
@@ -79,5 +85,6 @@ const executeStatement = async(statment,values) => {
 
 module.exports = {
     getSupervisorOrders,
-    getBillOfLadingInfo
+    getBillOfLadingInfo,
+    getWhsNames
 };

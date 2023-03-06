@@ -87,8 +87,19 @@ const getTransaction = async (pool) => {
     } 
 }
 
+// create SQL request from transaction
+const getrequest = async (transaction) => {
+    try{
+        const request = new mssql.Request(transaction)
+        return request
+    }catch(err){
+        return
+    } 
+}
+
 module.exports = {
     getSQL,
     getTransaction,
-    getTransSQL
+    getTransSQL,
+    getrequest
 };
