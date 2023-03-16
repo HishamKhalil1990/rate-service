@@ -98,8 +98,33 @@ const saveRate = async (req, res) => {
   })
 };
 
+const getBranchesList = async (req, res) => {
+  try{
+    const branches = await functions.getBranches()
+    if(branches){
+      res.send({
+        status: "success",
+        data: {
+          branches,
+        }
+      })
+    }else{
+      res.send({
+        status: "failed",
+        msg:'لم يتم تحديث قائمة الفروع'
+      })
+    }
+  }catch(err){
+    res.send({
+      status: "failed",
+      msg:'لم يتم سحب البيانات لوجود خلل تقني الرجاء المحاولة لاحقا'
+    })
+  }
+}
+
 module.exports = {
   checkUser,
   getQuestions,
   saveRate,
+  getBranchesList
 };
