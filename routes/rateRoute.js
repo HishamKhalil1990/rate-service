@@ -7,5 +7,6 @@ router.get('/get-rate-questions',controller.getQuestions)
 router.get('/get-branches',controller.getBranchesList)
 router.post('/check-supervisor-user',controller.checkUser)
 router.post('/save-rate',controller.saveRate)
+router.post('/send-customer-info',controller.saveCustomer)
 
 module.exports = router

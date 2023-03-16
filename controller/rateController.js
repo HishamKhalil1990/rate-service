@@ -122,9 +122,24 @@ const getBranchesList = async (req, res) => {
   }
 }
 
+const saveCustomer = async (req, res) => {
+  const data = req.body
+  try{
+    res.send({
+      status: "success",
+    })
+  }catch(err){
+    res.send({
+      status: "failed",
+      msg:'لم يتم حفظ المعلومات'
+    })
+  }
+}
+
 module.exports = {
   checkUser,
   getQuestions,
   saveRate,
-  getBranchesList
+  getBranchesList,
+  saveCustomer
 };
