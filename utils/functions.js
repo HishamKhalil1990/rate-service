@@ -21,6 +21,7 @@ const MSSQL_SUPERVISORS_USER_TABLE = process.env.MSSQL_SUPERVISORS_USER_TABLE
 const MSSQL_CHECK_LIST_QUESTIONS = process.env.MSSQL_CHECK_LIST_QUESTIONS
 const MSSQL_RATE_QUESTIONS_SCORES = process.env.MSSQL_RATE_QUESTIONS_SCORES
 const MSSQL_RATE_GENERAL_INFO = process.env.MSSQL_RATE_GENERAL_INFO
+const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
 
 const fetchRates = async() => {
     try{
@@ -996,6 +997,82 @@ const saveCategoriesRate = async(data) => {
     })
 }
 
+const saveInCustTable = async(data) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async() => {
+                const pool = await sql.getSQL();
+                saveRecordInCustTable(data,pool)
+                .then(() => {
+                    resolve()
+                    pool.close()
+                })
+                .catch(() => {
+                    reject()
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const saveRecordInCustTable = async(data,pool) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async () => {
+                const transaction = await sql.getTransaction(pool);
+                const request = await sql.getrequest(transaction)
+                return transaction.begin(err => {
+                    if(err){
+                        console.log('transaction begin',err)
+                        reject()
+                    }
+                    if(request){
+                        return request.query(
+                        `insert into ${MSSQL_CUSTOMER_RATING_TABLE} 
+                        (
+                            branchName,
+                            username,
+                            phoneNumber,
+                            serviceLevel
+                        ) 
+                        values 
+                        (
+                            '${data.branch}',
+                            '${data.userName}',
+                            '${data.phoneNo}',
+                            '${data.serviceLevelValue}'
+                        )`
+                        , (err, result) => {
+                            if(err){
+                                console.log('request query',err)  
+                                reject()
+                            }    
+                            transaction.commit(err => {
+                                if(err){
+                                    console.log('request query',err)
+                                    reject()
+                                }else{
+                                    resolve()
+                                }  
+                            })
+                        })
+                    }else{
+                        reject()
+                    }
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
 module.exports = {
     fetchRates,
     authentication,
@@ -1009,5 +1086,6 @@ module.exports = {
     getBranches,
     getCategories,
     saveCategoriesRate,
-    getRateID
+    getRateID,
+    saveInCustTable
 }

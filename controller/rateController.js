@@ -123,10 +123,20 @@ const getBranchesList = async (req, res) => {
 }
 
 const saveCustomer = async (req, res) => {
-  const data = req.body
+  let data = req.body
   try{
-    res.send({
-      status: "success",
+    data.userName = data.userName? data.userName : 'غير مدخل'
+    data.serviceLevelValue = data.serviceLevelValue? data.serviceLevelValue : 'غير مدخل'
+    functions.saveInCustTable(data)
+    .then(() => {
+      res.send({
+        status: "success",
+      })
+    }).catch(() => {
+      res.send({
+        status: "failed",
+        msg:'لم يتم حفظ المعلومات'
+      })
     })
   }catch(err){
     res.send({
