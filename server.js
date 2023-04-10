@@ -7,6 +7,7 @@ const mainRouter = require('./routes/mainRoute')
 const supervisorRouter = require('./routes/supervisorRoute')
 const trucksRouter = require('./routes/trucksRoute')
 const rateRouter = require('./routes/rateRoute')
+const trainningRouter = require('./routes/trainningRoute')
 
 const PORT = process.env.PORT
 
@@ -25,3 +26,4 @@ app.use('/',mainRouter)
 app.use('/mobile',supervisorRouter)
 app.use('/truck',trucksRouter)
 app.use('/rate',rateRouter)
+app.use('/trainning',trainningRouter)

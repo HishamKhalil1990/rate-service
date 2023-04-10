@@ -22,6 +22,9 @@ const MSSQL_CHECK_LIST_QUESTIONS = process.env.MSSQL_CHECK_LIST_QUESTIONS
 const MSSQL_RATE_QUESTIONS_SCORES = process.env.MSSQL_RATE_QUESTIONS_SCORES
 const MSSQL_RATE_GENERAL_INFO = process.env.MSSQL_RATE_GENERAL_INFO
 const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
+const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
+const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
+const MSSQL_TRAIN_GENERAL_INFO = process.env.MSSQL_TRAIN_GENERAL_INFO
 
 const fetchRates = async() => {
     try{
@@ -767,6 +770,62 @@ const getCategories = async () => {
     }
 }
 
+const getTrainCategories = async () => {
+    try{
+        const pool = await sql.getSQL();
+        if(pool){
+            const user = await pool.request().query(`select * from ${MSSQL_TRAIN_LIST_QUESTIONS} where status = 'active'`)
+            .then(result => {
+                pool.close();
+                let mappedResult = []
+                let categoriesList = {}
+                result.recordset.forEach(rec => {
+                    const keys = Object.keys(categoriesList)
+                    if(keys.includes(rec.category)){
+                        const id = mappedResult[categoriesList[`${rec.category}`]].questions.length
+                        mappedResult[categoriesList[`${rec.category}`]].questions.push({
+                            id: id,
+                            max: rec.noOfQuestions,
+                            score: 'n',
+                            qCode: rec.qCode,
+                            question: rec.question,
+                            maxGrade: rec.maxGrade,
+                            note:''
+                        })
+                    }else{
+                        const id = mappedResult.length
+                        categoriesList[`${rec.category}`] = id
+                        mappedResult.push({
+                            id: id,
+                            max: rec.noOfCategories,
+                            total: 0,
+                            maxTotal: rec.categoryTotal,
+                            name: rec.category,
+                            questions: [
+                                {
+                                    id: 0,
+                                    max: rec.noOfQuestions,
+                                    score: 'n',
+                                    qCode: rec.qCode,
+                                    question: rec.question,
+                                    maxGrade: rec.maxGrade,
+                                    note:''
+                                }
+                            ]
+                        })
+                    }
+                })
+                return mappedResult;
+            })
+            return user
+        }else{
+            return
+        }
+    }catch(err){
+        return
+    }
+}
+
 const getRateID = async() => {
     try {
         let no = fs.readFileSync(`./rateID.txt`, 'utf8');
@@ -1073,6 +1132,48 @@ const saveRecordInCustTable = async(data,pool) => {
     })
 }
 
+const saveCategoriesReport = async(data) => {
+    return new Promise((resolve,reject) => {
+        console.log(data)
+        resolve()
+        // try{
+        //     const start = async() => {
+        //         const pool = await sql.getSQL();
+        //         const rateID = await getRateID()
+        //         const categories = data.allCatData
+        //         const total = categories.reduce((acc,cat) => acc + cat.total,0)
+        //         const maxTotal = categories.reduce((acc,cat) => acc + cat.maxTotal,0)
+        //         const rateScore = parseFloat(total*100/maxTotal).toFixed(3)
+        //         const info = {
+        //             username:data.username,
+        //             branch:data.branchValue,
+        //             names:getNames(data.names),
+        //             noOfEmployees:data.names.length,
+        //             date:data.date,
+        //         }
+        //         const arr = []
+        //         const length = categories.length
+        //         categories.forEach(cat => {
+        //             saveCategory(cat,rateID,pool,info,rateScore)
+        //             .then(() => {
+        //                 arr.push('done')
+        //                 if(arr.length == length){
+        //                     pool.close()
+        //                     resolve()
+        //                 }
+        //             }).catch(() => {
+        //                 reject()
+        //             })
+        //         })
+        //     }
+        //     start()
+        // }catch(err){
+        //     console.log(err)
+        //     reject()
+        // }
+    })
+}
+
 module.exports = {
     fetchRates,
     authentication,
@@ -1087,5 +1188,7 @@ module.exports = {
     getCategories,
     saveCategoriesRate,
     getRateID,
-    saveInCustTable
+    saveInCustTable,
+    getTrainCategories,
+    saveCategoriesReport
 }
