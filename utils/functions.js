@@ -826,13 +826,13 @@ const getTrainCategories = async () => {
     }
 }
 
-const getRateID = async() => {
+const getID = async(path) => {
     try {
-        let no = fs.readFileSync(`./rateID.txt`, 'utf8');
+        let no = fs.readFileSync(path, 'utf8');
         const rateID = 'r-' + no
         no = parseInt(no) + 1
         no = no.toString()
-        fs.writeFileSync(`./rateID.txt`, no);
+        fs.writeFileSync(path, no);
         return rateID
     } catch (err) {
         console.log(err)
@@ -1021,7 +1021,7 @@ const saveCategoriesRate = async(data) => {
         try{
             const start = async() => {
                 const pool = await sql.getSQL();
-                const rateID = await getRateID()
+                const rateID = await getID('./rateID.txt')
                 const categories = data.allCatData
                 const total = categories.reduce((acc,cat) => acc + cat.total,0)
                 const maxTotal = categories.reduce((acc,cat) => acc + cat.maxTotal,0)
@@ -1132,45 +1132,223 @@ const saveRecordInCustTable = async(data,pool) => {
     })
 }
 
+const getTimeFormat = (time) => {
+    let hours = time.getHours();
+    let minutes = time.getMinutes();
+    let ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    let strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
+}
+
+const saveVisitQuestions = async(question,visitID,pool,info,catName) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async () => {
+                const transaction = await sql.getTransaction(pool);
+                const request = await sql.getrequest(transaction)
+                return transaction.begin(err => {
+                    if(err){
+                        console.log('transaction begin',err)
+                        reject()
+                    }
+                    if(request){
+                        return request.query(
+                        `insert into ${MSSQL_TRAIN_QUESTIONS_SCORES} 
+                        (
+                            visitID,
+                            qCode,
+                            question,
+                            category,
+                            score,
+                            maxGrade,
+                            note
+                        ) 
+                        values 
+                        (
+                            '${visitID}',
+                            '${question.qCode}',
+                            '${question.question}',
+                            '${catName}',
+                            '${question.score}',
+                            ${question.maxGrade},
+                            '${question.note}'
+                        )`
+                        , (err, result) => {
+                            if(err){
+                                console.log('request query',err)  
+                                reject()
+                            }    
+                            transaction.commit(err => {
+                                if(err){
+                                    console.log('request query',err)
+                                    reject()
+                                }else{
+                                    resolve()
+                                }  
+                            })
+                        })
+                    }else{
+                        reject()
+                    }
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const saveVisitCatRecord = async(category,visitID,pool,info,visitScore) =>{
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async() => {
+                const transaction = await sql.getTransaction(pool);
+                const request = await sql.getrequest(transaction)
+                transaction.begin(err => {
+                    if(err){
+                        console.log('transaction begin',err)
+                        reject()
+                    }
+                    if(request){
+                        return request.query(
+                        `insert into ${MSSQL_TRAIN_GENERAL_INFO} 
+                        (
+                            visitID,
+                            branch,
+                            visitorName,
+                            supervisorName,
+                            category,
+                            categoryScore,
+                            visitDate,
+                            visitStartTime,
+                            visitFinishTime,
+                            visitScore,
+                            noOfQuestions,
+                            favourite,
+                            username
+                        ) 
+                        values 
+                        (
+                            '${visitID}',
+                            '${info.branch}',
+                            '${info.visitorName}',
+                            '${info.supervisorName}',
+                            '${category.name}',
+                            ${parseFloat(category.total*100/category.maxTotal).toFixed(2)},
+                            '${new Date(info.date).toISOString().split('T')[0]}',
+                            '${getTimeFormat(new Date(info.date))}',
+                            '${getTimeFormat(new Date(Date.now()))}',
+                            ${visitScore},
+                            ${category.questions.length},
+                            '${info.favourite}',
+                            '${info.username}'
+                        )`
+                        , (err, result) => {
+                            if(err){
+                                console.log('request query',err)  
+                                reject()
+                            }    
+                            transaction.commit(err => {
+                                if(err){
+                                    console.log('request query',err)
+                                    reject()
+                                }else{
+                                    resolve(true)
+                                }  
+                            })
+                        })
+                    }else{
+                        reject()
+                    }
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const saveVisitCategory = async(category,visitID,pool,info,visitScore) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async() => {
+                const quesLength = category.questions.length
+                const quesArr = []
+                const isSaved = await saveVisitCatRecord(category,visitID,pool,info,visitScore)
+                .then(() => {
+                    return true
+                }).catch(() => {
+                    return false
+                })
+                if(isSaved){
+                    category.questions.forEach(question => {
+                        saveVisitQuestions(question,visitID,pool,info,category.name)
+                        .then(() => {
+                            quesArr.push('done')
+                            if(quesArr.length == quesLength){
+                                resolve()
+                            }
+                        }).catch(() => {
+                            reject()
+                        })
+                    })
+                }else{
+                    reject()
+                }
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
 const saveCategoriesReport = async(data) => {
     return new Promise((resolve,reject) => {
-        console.log(data)
-        resolve()
-        // try{
-        //     const start = async() => {
-        //         const pool = await sql.getSQL();
-        //         const rateID = await getRateID()
-        //         const categories = data.allCatData
-        //         const total = categories.reduce((acc,cat) => acc + cat.total,0)
-        //         const maxTotal = categories.reduce((acc,cat) => acc + cat.maxTotal,0)
-        //         const rateScore = parseFloat(total*100/maxTotal).toFixed(3)
-        //         const info = {
-        //             username:data.username,
-        //             branch:data.branchValue,
-        //             names:getNames(data.names),
-        //             noOfEmployees:data.names.length,
-        //             date:data.date,
-        //         }
-        //         const arr = []
-        //         const length = categories.length
-        //         categories.forEach(cat => {
-        //             saveCategory(cat,rateID,pool,info,rateScore)
-        //             .then(() => {
-        //                 arr.push('done')
-        //                 if(arr.length == length){
-        //                     pool.close()
-        //                     resolve()
-        //                 }
-        //             }).catch(() => {
-        //                 reject()
-        //             })
-        //         })
-        //     }
-        //     start()
-        // }catch(err){
-        //     console.log(err)
-        //     reject()
-        // }
+        try{
+            const start = async() => {
+                const pool = await sql.getSQL();
+                const visitID = await getID('./visitID.txt')
+                const categories = data.allCatData
+                const total = categories.reduce((acc,cat) => acc + cat.total,0)
+                const maxTotal = categories.reduce((acc,cat) => acc + cat.maxTotal,0)
+                const visitScore = parseFloat(total*100/maxTotal).toFixed(2)
+                const info = {
+                    username:data.username,
+                    branch:data.branchValue,
+                    supervisorName:data.names.supervisor,
+                    visitorName:data.names.vistor,
+                    date:data.date,
+                    favourite:data.favourite,
+                }
+                const arr = []
+                const length = categories.length
+                categories.forEach(cat => {
+                    saveVisitCategory(cat,visitID,pool,info,visitScore)
+                    .then(() => {
+                        arr.push('done')
+                        if(arr.length == length){
+                            pool.close()
+                            resolve()
+                        }
+                    }).catch(() => {
+                        reject()
+                    })
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
     })
 }
 
@@ -1187,7 +1365,6 @@ module.exports = {
     getBranches,
     getCategories,
     saveCategoriesRate,
-    getRateID,
     saveInCustTable,
     getTrainCategories,
     saveCategoriesReport
