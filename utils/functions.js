@@ -1142,7 +1142,7 @@ const saveRecordInCustTable = async(data,pool) => {
 const saveMsg = async (msg,pool,uniqueValue) => {
     return new Promise((resolve,reject) => {
         try{
-            const start = async () => {explor
+            const start = async () => {
                 let id = ''
                 if(msg != "Invalid Mobile Number"){
                     const arr = msg.split(' ')
