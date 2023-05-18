@@ -128,7 +128,8 @@ const saveCustomer = async (req, res) => {
     data.userName = data.userName? data.userName : 'غير مدخل'
     data.serviceLevelValue = data.serviceLevelValue? data.serviceLevelValue : 'غير مدخل'
     functions.saveInCustTable(data)
-    .then(() => {
+    .then((uniqueValue) => {
+      functions.sendMsg(data,uniqueValue)
       res.send({
         status: "success",
       })

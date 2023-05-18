@@ -6,6 +6,7 @@ const sql = require('./sql')
 const fs = require('fs')
 const sendEmail = require('./email')
 const hana = require('./hana')
+const axios = require('axios')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const MALTRANS_USERS_TABLE = process.env.MALTRANS_USERS_TABLE
@@ -25,6 +26,9 @@ const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
 const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
 const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
 const MSSQL_TRAIN_GENERAL_INFO = process.env.MSSQL_TRAIN_GENERAL_INFO
+const JORMAL_SERNDERID = process.env.JORMAL_SERNDERID
+const JORMAL_ACCNAME = process.env.JORMAL_ACCNAME
+const JORMAL_ACCPASS = process.env.JORMAL_ACCPASS
 
 const fetchRates = async() => {
     try{
@@ -1062,8 +1066,8 @@ const saveInCustTable = async(data) => {
             const start = async() => {
                 const pool = await sql.getSQL();
                 saveRecordInCustTable(data,pool)
-                .then(() => {
-                    resolve()
+                .then((uniqueValue) => {
+                    resolve(uniqueValue)
                     pool.close()
                 })
                 .catch(() => {
@@ -1082,6 +1086,7 @@ const saveRecordInCustTable = async(data,pool) => {
     return new Promise((resolve,reject) => {
         try{
             const start = async () => {
+                const uniqueValue = (new Date()).toISOString().split('T')[0] + data.phoneNo
                 const transaction = await sql.getTransaction(pool);
                 const request = await sql.getrequest(transaction)
                 return transaction.begin(err => {
@@ -1096,15 +1101,65 @@ const saveRecordInCustTable = async(data,pool) => {
                             branchName,
                             username,
                             phoneNumber,
-                            serviceLevel
+                            serviceLevel,
+                            smsMsgID
                         ) 
                         values 
                         (
                             '${data.branch}',
                             '${data.userName}',
                             '${data.phoneNo}',
-                            '${data.serviceLevelValue}'
+                            '${data.serviceLevelValue}',
+                            '${uniqueValue}'
                         )`
+                        , (err, result) => {
+                            if(err){
+                                console.log('request query',err)  
+                                reject()
+                            }    
+                            transaction.commit(err => {
+                                if(err){
+                                    console.log('request query',err)
+                                    reject()
+                                }else{
+                                    resolve(uniqueValue)
+                                }  
+                            })
+                        })
+                    }else{
+                        reject()
+                    }
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            reject()
+        }
+    })
+}
+
+const saveMsg = async (msg,pool,uniqueValue) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async () => {explor
+                let id = ''
+                if(msg != "Invalid Mobile Number"){
+                    const arr = msg.split(' ')
+                    id = arr[arr.length - 1]
+                }else{
+                    id = msg
+                }
+                const transaction = await sql.getTransaction(pool);
+                const request = await sql.getrequest(transaction)
+                return transaction.begin(err => {
+                    if(err){
+                        console.log('transaction begin',err)
+                        reject()
+                    }
+                    if(request){
+                        return request.query(
+                        `update ${MSSQL_CUSTOMER_RATING_TABLE} set smsMsgID = '${id}' where smsMsgID = '${uniqueValue}'`
                         , (err, result) => {
                             if(err){
                                 console.log('request query',err)  
@@ -1130,6 +1185,44 @@ const saveRecordInCustTable = async(data,pool) => {
             reject()
         }
     })
+}
+
+const sendMsg = async(data,uniqueValue) => {
+    let msg = ''
+    switch(data.serviceLevelValue){
+        case `راضي`:
+            msg = 'شكرا لزيارتك الريحان. نتمى لك يوما سعيدا'
+            break;
+        case `غير راضي`:
+            msg = 'شكرا لزيارتك الريحان. سيتم التواصل معك قريبا لمعرفة كيف كانت تجربتك بفرع الريحان'
+            break;
+        case `غير مدخل`:
+            msg = 'شكرا لزيارتك الريحان. نتمى لك يوما سعيدا'
+            break;
+    }
+    const params = new URLSearchParams();
+    params.append('senderid', JORMAL_SERNDERID);
+    params.append('numbers', data.phoneNo);
+    params.append('accname', JORMAL_ACCNAME);
+    params.append('AccPass', JORMAL_ACCPASS);
+    params.append('msg', msg);
+    await axios({
+        url:'https://josmsservice.com/SMSServices/Clients/Prof/RestSingleSMS/SendSMS',
+        params,
+        method:'get'
+    })
+    .then(response => {
+        const start = async() => {
+            const pool = await sql.getSQL();
+            saveMsg(response.data,pool,uniqueValue)
+            .then(() => {
+                pool.close()
+            })
+            .catch(() => {})
+        }
+        start()
+    })
+    .catch(err => {})
 }
 
 const getTimeFormat = (time) => {
@@ -1367,5 +1460,6 @@ module.exports = {
     saveCategoriesRate,
     saveInCustTable,
     getTrainCategories,
-    saveCategoriesReport
+    saveCategoriesReport,
+    sendMsg
 }
