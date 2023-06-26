@@ -709,8 +709,7 @@ const getBranches = async(info) => {
             return rec.WhsName
         })
         return whs
-    }
-    if(info.roleNo == 1){
+    }else{
         const arr = info.warehouses.split('-')
         let whs = await hana.getWhsNames()
         whs = whs.filter(rec => arr.includes(rec.WhsCode))
