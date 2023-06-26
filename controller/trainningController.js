@@ -1,11 +1,14 @@
 const functions = require('../utils/functions')
 
 const checkUser = async (req, res) => {
+  const info = {
+    roleNo:0
+  }
   try{
     const {username,password} = req.body
     const users = await functions.checkUser(username,password)
     if(users?.length > 0){
-      const branches = await functions.getBranches()
+      const branches = await functions.getBranches(info)
       if(branches){
         const categories = await functions.getTrainCategories()
         if(categories){
@@ -50,8 +53,11 @@ const checkUser = async (req, res) => {
 };
 
 const getQuestions = async (req, res) => {
+  const info = {
+    roleNo:0
+  }
   try{
-    const branches = await functions.getBranches()
+    const branches = await functions.getBranches(info)
     if(branches){
       const categories = await functions.getTrainCategories()
       if(categories){
@@ -99,8 +105,11 @@ const saveTrainning = async (req, res) => {
 };
 
 const getBranchesList = async (req, res) => {
+  const info = {
+    roleNo:0
+  }
   try{
-    const branches = await functions.getBranches()
+    const branches = await functions.getBranches(info)
     if(branches){
       res.send({
         status: "success",

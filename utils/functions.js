@@ -702,19 +702,30 @@ const checkUser = async (username,password) => {
     }
 }
 
-const getBranches = async() => {
-    let whs = await hana.getWhsNames()
-    whs = whs.map(rec => {
-        return rec.WhsName
-    })
-    return whs
+const getBranches = async(info) => {
+    if(info.roleNo == 0){
+        let whs = await hana.getWhsNames()
+        whs = whs.map(rec => {
+            return rec.WhsName
+        })
+        return whs
+    }
+    if(info.roleNo == 1){
+        const arr = info.warehouses.split('-')
+        let whs = await hana.getWhsNames()
+        whs = whs.filter(rec => arr.includes(rec.WhsCode))
+        whs = whs.map(rec => {
+            return rec.WhsName
+        })
+        return whs
+    }
 }
 
-const getCategories = async () => {
+const getCategories = async (info) => {
     try{
         const pool = await sql.getSQL();
         if(pool){
-            const user = await pool.request().query(`select * from ${MSSQL_CHECK_LIST_QUESTIONS} where status = 'active'`)
+            const user = await pool.request().query(`select * from ${MSSQL_CHECK_LIST_QUESTIONS} where status = 'active' and roleNo = ${info.roleNo}`)
             .then(result => {
                 pool.close();
                 let mappedResult = []

@@ -4,14 +4,20 @@ const checkUser = async (req, res) => {
   try{
     const {username,password} = req.body
     const users = await functions.checkUser(username,password)
+    const info = {
+      warehouses:users[0].warehouses,
+      role:users[0].role,
+      roleNo:users[0].roleNo
+    }
     if(users?.length > 0){
-      const branches = await functions.getBranches()
+      const branches = await functions.getBranches(info)
       if(branches){
-        const categories = await functions.getCategories()
+        const categories = await functions.getCategories(info)
         if(categories){
           res.send({
             status: "success",
             username: users[0].supervisorName,
+            info,
             data: {
               branches,
               categories
@@ -50,10 +56,11 @@ const checkUser = async (req, res) => {
 };
 
 const getQuestions = async (req, res) => {
+  const info = req.body
   try{
-    const branches = await functions.getBranches()
+    const branches = await functions.getBranches(info)
     if(branches){
-      const categories = await functions.getCategories()
+      const categories = await functions.getCategories(info)
       if(categories){
         res.send({
           status: "success",
@@ -99,8 +106,11 @@ const saveRate = async (req, res) => {
 };
 
 const getBranchesList = async (req, res) => {
+  const info = {
+    roleNo:0
+  }
   try{
-    const branches = await functions.getBranches()
+    const branches = await functions.getBranches(info)
     if(branches){
       res.send({
         status: "success",
