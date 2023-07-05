@@ -90,8 +90,14 @@ const getQuestions = async (req, res) => {
 };
 
 const saveRate = async (req, res) => {
-  const data = req.body
-  functions.saveCategoriesRate(data)
+  const body = req.body
+  const data = JSON.parse(body.data)
+  const files = req.files? req.files : []
+  const rateID = await functions.getID('./rateID.txt')
+  if(files.length > 0){
+    await functions.saveImages(files,rateID)
+  }
+  functions.saveCategoriesRate(data,rateID)
   .then(() => {
     res.send({
       status: "success",

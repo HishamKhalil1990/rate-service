@@ -11,6 +11,7 @@ const axios = require('axios')
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const MALTRANS_USERS_TABLE = process.env.MALTRANS_USERS_TABLE
 const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
+const IMAGE_FOLDER_PATH = process.env.IMAGE_FOLDER_PATH
 const MSSQL_MALTRANS_SUBMIT_PROCEDURE = process.env.MSSQL_MALTRANS_SUBMIT_PROCEDURE
 const MALTRANS_HISTORY_TABLE = process.env.MALTRANS_HISTORY_TABLE
 const MALTRANS_SUBMIT_TABLE = process.env.MALTRANS_SUBMIT_TABLE
@@ -22,6 +23,7 @@ const MSSQL_SUPERVISORS_USER_TABLE = process.env.MSSQL_SUPERVISORS_USER_TABLE
 const MSSQL_CHECK_LIST_QUESTIONS = process.env.MSSQL_CHECK_LIST_QUESTIONS
 const MSSQL_RATE_QUESTIONS_SCORES = process.env.MSSQL_RATE_QUESTIONS_SCORES
 const MSSQL_RATE_GENERAL_INFO = process.env.MSSQL_RATE_GENERAL_INFO
+const MSSQL_RATE_IMAGES_PATH = process.env.MSSQL_RATE_IMAGES_PATH
 const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
 const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
 const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
@@ -703,7 +705,7 @@ const checkUser = async (username,password) => {
 }
 
 const getBranches = async(info) => {
-    if(info.roleNo == 0){
+    if(info.roleNo == 0 || info.warehouses == 'allrayhan'){
         let whs = await hana.getWhsNames()
         whs = whs.map(rec => {
             return rec.WhsName
@@ -943,7 +945,8 @@ const saveQuestions = async(question,rateID,pool,info,catName) => {
                             score,
                             maxGrade,
                             branch,
-                            ratedate
+                            ratedate,
+                            note
                         ) 
                         values 
                         (
@@ -954,7 +957,8 @@ const saveQuestions = async(question,rateID,pool,info,catName) => {
                             ${question.score},
                             ${question.maxGrade},
                             '${info.branch}',
-                            '${new Date(info.date).toISOString().split('T')[0]}'
+                            '${new Date(info.date).toISOString().split('T')[0]}',
+                            '${question.note}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -999,6 +1003,7 @@ const saveCategory = async(category,rateID,pool,info,rateScore) => {
                 })
                 if(isSaved){
                     category.questions.forEach(question => {
+                        question.note = question.note? question.note : 'لا يوجد'
                         saveQuestions(question,rateID,pool,info,category.name)
                         .then(() => {
                             quesArr.push('done')
@@ -1030,12 +1035,75 @@ const getNames = (names) => {
     return str
 }
 
-const saveCategoriesRate = async(data) => {
+const saveImagePath = async(rateID,path,pool) => {
+    return new Promise((resolve,reject) => {
+        try{
+            const start = async () => {
+                const transaction = await sql.getTransaction(pool);
+                const request = await sql.getrequest(transaction)
+                return transaction.begin(err => {
+                    if(err){
+                        console.log('transaction begin',err)
+                        resolve()
+                    }
+                    if(request){
+                        return request.query(
+                        `insert into ${MSSQL_RATE_IMAGES_PATH} 
+                        (
+                            rateID,
+                            rateImagePath
+                        ) 
+                        values 
+                        (
+                            '${rateID}',
+                            '${path}'
+                        )`
+                        , (err, result) => {
+                            if(err){
+                                console.log('request query',err)  
+                                resolve()
+                            }else{
+                                transaction.commit(err => {
+                                    if(err){
+                                        console.log('request query',err)
+                                        resolve()
+                                    }else{
+                                        resolve()
+                                    }  
+                                })
+                            }    
+                        })
+                    }else{
+                        resolve()
+                    }
+                })
+            }
+            start()
+        }catch(err){
+            console.log(err)
+            resolve()
+        }
+    })
+}
+
+const saveImages = async(files,rateID) => {
+    const pool = await sql.getSQL();
+    const promises = []
+    for(let i = 0; i < files.length; i++){
+        const file =files[i]
+        fs.writeFileSync(`${IMAGE_FOLDER_PATH}/${rateID}_${file.originalname}.jpeg`, file.buffer);
+        promises.push(saveImagePath(rateID,`${IMAGE_FOLDER_PATH}/${rateID}_${file.originalname}.jpeg`,pool))
+    }
+    return Promise.all(promises).then(() => {
+        pool.close()
+    })
+}
+
+const saveCategoriesRate = async(data,rateID) => {
     return new Promise((resolve,reject) => {
         try{
             const start = async() => {
                 const pool = await sql.getSQL();
-                const rateID = await getID('./rateID.txt')
                 const categories = data.allCatData
                 const total = categories.reduce((acc,cat) => acc + cat.total,0)
                 const maxTotal = categories.reduce((acc,cat) => acc + cat.maxTotal,0)
@@ -1471,5 +1539,7 @@ module.exports = {
     saveInCustTable,
     getTrainCategories,
     saveCategoriesReport,
-    sendMsg
+    sendMsg,
+    getID,
+    saveImages
 }
