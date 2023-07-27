@@ -28,6 +28,7 @@ const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
 const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
 const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
 const MSSQL_TRAIN_GENERAL_INFO = process.env.MSSQL_TRAIN_GENERAL_INFO
+const MSSQL_BARCODE_SEARCH = process.env.MSSQL_BARCODE_SEARCH
 const JORMAL_SERNDERID = process.env.JORMAL_SERNDERID
 const JORMAL_ACCNAME = process.env.JORMAL_ACCNAME
 const JORMAL_ACCPASS = process.env.JORMAL_ACCPASS
@@ -1523,6 +1524,68 @@ const saveCategoriesReport = async(data) => {
     })
 }
 
+const searchBarcodes = async(itemName) => {
+    return new Promise((resolve,reject) => {
+        const start = async() => {
+            try{
+                const pool = await sql.getSQL();
+                if(pool){
+                    await getBarcodes(itemName,pool)
+                    .then(results => {
+                        pool.close()
+                        resolve(results)
+                    })
+                    .catch(() => {
+                        pool.close()
+                        reject()
+                    })
+                }
+            }catch(err){
+                console.log(err)
+                reject()
+            }
+
+        }
+        start()
+    })
+}
+
+const getBarcodes = async(itemName,pool) => {
+    return new Promise((resolve,reject) => {
+        const start = async() => {
+            try{
+                const transaction = await sql.getTransaction(pool);
+                transaction.begin((err) => {
+                    if(err){
+                        console.log("pool",err)
+                        reject()
+                    }
+                    pool.request()
+                    .input("ItemDesc",itemName)
+                    .execute(MSSQL_BARCODE_SEARCH,(err,result) => {
+                        if(err){
+                            console.log('excute',err)
+                            reject()
+                        }
+                        transaction.commit((err) => {
+                            if(err){
+                                console.log('transaction error : ',err)
+                                reject()
+                            }
+                            resolve(result);
+                        });
+                    })
+                })
+            }catch(err){
+                console.log(err)
+                reject()
+            }
+
+        }
+        start()
+    })
+}
+
 module.exports = {
     fetchRates,
     authentication,
@@ -1541,5 +1604,6 @@ module.exports = {
     saveCategoriesReport,
     sendMsg,
     getID,
-    saveImages
+    saveImages,
+    searchBarcodes
 }
