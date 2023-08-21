@@ -24,6 +24,7 @@ const MSSQL_CHECK_LIST_QUESTIONS = process.env.MSSQL_CHECK_LIST_QUESTIONS
 const MSSQL_RATE_QUESTIONS_SCORES = process.env.MSSQL_RATE_QUESTIONS_SCORES
 const MSSQL_RATE_GENERAL_INFO = process.env.MSSQL_RATE_GENERAL_INFO
 const MSSQL_RATE_IMAGES_PATH = process.env.MSSQL_RATE_IMAGES_PATH
+const MSSQL_RATE_QUESTIONS_ANSWERS = process.env.MSSQL_RATE_QUESTIONS_ANSWERS
 const MSSQL_CUSTOMER_RATING_TABLE = process.env.MSSQL_CUSTOMER_RATING_TABLE
 const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
 const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
@@ -743,6 +744,8 @@ const getCategories = async (info) => {
                             qCode: rec.qCode,
                             question: rec.question,
                             maxGrade: rec.maxGrade,
+                            qID:rec.ID,
+                            answers:[]
                         })
                     }else{
                         const id = mappedResult.length
@@ -761,6 +764,8 @@ const getCategories = async (info) => {
                                     qCode: rec.qCode,
                                     question: rec.question,
                                     maxGrade: rec.maxGrade,
+                                    qID:rec.ID,
+                                    answers:[]
                                 }
                             ]
                         })
@@ -779,6 +784,37 @@ const getCategories = async (info) => {
                 return mappedResult;
             })
             return user
+        }else{
+            return
+        }
+    }catch(err){
+        return
+    }
+}
+
+const getQuesAnswers = async(info,categories) =>{
+    try{
+        const pool = await sql.getSQL();
+        if(pool){
+            const answers = await pool.request().query(`select * from ${MSSQL_RATE_QUESTIONS_ANSWERS} where status = 'active' and roleNo = ${info.roleNo} order by qID`)
+            .then(result => {
+                pool.close();
+                let answersList = {}
+                result.recordset.forEach(rec => {
+                    const keys = Object.keys(answersList)
+                    if(keys.includes(`${rec.qID}`)){
+                        answersList[`${rec.qID}`].push(rec.answer)
+                    }else{
+                        answersList[`${rec.qID}`] = ['لا يوجد',rec.answer]
+                    }
+                })
+                categories.forEach(cat => {
+                    cat.questions.forEach(question => {
+                        question.answers = answersList[`${question.qID}`]
+                    })
+                })
+            })
+            return answers
         }else{
             return
         }
@@ -1605,5 +1641,6 @@ module.exports = {
     sendMsg,
     getID,
     saveImages,
-    searchBarcodes
+    searchBarcodes,
+    getQuesAnswers
 }

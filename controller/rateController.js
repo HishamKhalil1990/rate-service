@@ -62,6 +62,7 @@ const getQuestions = async (req, res) => {
     if(branches){
       const categories = await functions.getCategories(info)
       if(categories){
+        await functions.getQuesAnswers(info,categories)
         res.send({
           status: "success",
           data: {
@@ -82,6 +83,7 @@ const getQuestions = async (req, res) => {
       })
     }
   }catch(err){
+    console.log(err)
     res.send({
       status: "failed",
       msg:'لم يتم سحب البيانات لوجود خلل تقني الرجاء المحاولة لاحقا'
