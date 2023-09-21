@@ -3,6 +3,7 @@ const hana = require('../utils/hana')
 const functions = require('../utils/functions')
 
 const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
+const join = true
 
 const supervisorOrders = async(req,res) => {
     try{
@@ -20,7 +21,7 @@ const supervisorOrders = async(req,res) => {
 }
 
 const billOfLadingInfo = async(req,res) => {
-    const {billNo} = req.body
+    const {billNo,customCenter,companyType,companyName} = req.body
     try{
         const updatedData = await functions.executeTransSql('getData',billNo)
         const historyData = await functions.executeTransSql('getHistoryData',billNo)
@@ -39,7 +40,18 @@ const billOfLadingInfo = async(req,res) => {
             }else{
                 mappedData['isHistory'] = '0'
             }
-            if(results.length > 0){
+            const isTransportor = companyType == 'ناقل'? true : (results[0].TRANSPORTER == 'Maltrans'? true : false)
+            mappedData['isTransportor'] = isTransportor
+            mappedData['actions'] = functions.getActions(customCenter,isTransportor,join)
+            mappedData['centers'] = customCenter? functions.getCustomCenter(customCenter,join) : []
+            if(results.length > 0 && companyType != 'ناقل'){
+                mappedData['mainData'] = results[0]
+                res.send({
+                    status:"success",
+                    msg:"success",
+                    data:mappedData
+                })
+            }else if(results.length > 0 && companyType == 'ناقل' && results[0].TRANSPORTER == companyName){
                 mappedData['mainData'] = results[0]
                 res.send({
                     status:"success",
@@ -69,11 +81,14 @@ const billOfLadingInfo = async(req,res) => {
 
 const checkMaltransUser = async(req,res) => {
     const {username,password} = req.body;
-    const data = await functions.getUser(username,password)
-    if(data){
-        if(data.length > 0){
+    const user = await functions.getUser(username,password)
+    if(user){
+        if(user.length > 0){
             let tokens = functions.create(username)
-                tokens.username = username
+                tokens.username = user[0].username
+                tokens.customCenter = user[0].customCenter
+                tokens.companyType = user[0].companyType
+                tokens.companyName = user[0].companyName
                 res.send({
                     status:"success",
                     msg:"success",

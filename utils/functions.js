@@ -1622,6 +1622,62 @@ const getBarcodes = async(itemName,pool) => {
     })
 }
 
+const getActions = (customCenter,isTransportor,join) => {
+    const actionArr = []
+    if(customCenter == 'عمان'){
+        actionArr.push('استلام صورة ملونة عن المستندات')
+        actionArr.push('فتح عملية')
+        actionArr.push('استلام المستندات الأصل وارسالها للعقبة')
+        actionArr.push('استلام إذن تسليم')
+        actionArr.push('تفعيل إذن التسليم')
+        if(join){
+            actionArr.push('تنظيم البيان')
+            actionArr.push('تخمين البيان')
+            actionArr.push('استلام موافقة على البيان مع عدم الدفع')
+            actionArr.push('دفع البيان')
+            actionArr.push('طلب سيارات من الناقل')
+            actionArr.push('النتائج')
+            actionArr.push('إنجاز')
+        }
+    }else if(customCenter == 'العقبة'){
+        if(join){
+            actionArr.push('استلام صورة ملونة عن المستندات')
+            actionArr.push('فتح عملية')
+            actionArr.push('استلام المستندات الأصل وارسالها للعقبة')
+            actionArr.push('استلام إذن تسليم')
+            actionArr.push('تفعيل إذن التسليم')
+        }
+        actionArr.push('تنظيم البيان')
+        actionArr.push('تخمين البيان')
+        actionArr.push('استلام موافقة على البيان مع عدم الدفع')
+        actionArr.push('دفع البيان')
+        actionArr.push('طلب سيارات من الناقل')
+        actionArr.push('النتائج')
+        actionArr.push('إنجاز')
+    }
+    if(isTransportor){
+        actionArr.push('تحميل من الميناء')
+        actionArr.push('معاينة مع عينة')
+        actionArr.push('معاينة بدون عينة')
+        actionArr.push('تصريح الخروج')
+    }
+    return actionArr
+}
+
+const getCustomCenter = (customCenter,join) => {
+    if(customCenter == 'عمان'){
+        if(join){
+            return ["جمرك عمان","جمرك المطار","جمرك سحاب","جمرك العقبة"]
+        }
+        return ["جمرك عمان","جمرك المطار","جمرك سحاب"]
+    }else if(customCenter == 'العقبة'){
+        if(join){
+            return ["جمرك عمان","جمرك المطار","جمرك سحاب","جمرك العقبة"]
+        }
+        return ["جمرك العقبة"]
+    }
+}
+
 module.exports = {
     fetchRates,
     authentication,
@@ -1642,5 +1698,7 @@ module.exports = {
     getID,
     saveImages,
     searchBarcodes,
-    getQuesAnswers
+    getQuesAnswers,
+    getActions,
+    getCustomCenter
 }
