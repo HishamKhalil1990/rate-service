@@ -3,7 +3,6 @@ const hana = require('../utils/hana')
 const functions = require('../utils/functions')
 
 const PDF_FOLDER_PATH = process.env.PDF_FOLDER_PATH
-const join = true
 
 const supervisorOrders = async(req,res) => {
     try{
@@ -42,8 +41,8 @@ const billOfLadingInfo = async(req,res) => {
             }
             const isTransportor = companyType == 'ناقل'? true : (results[0].TRANSPORTER == 'Maltrans'? true : false)
             mappedData['isTransportor'] = isTransportor
-            mappedData['actions'] = functions.getActions(customCenter,isTransportor,join)
-            mappedData['centers'] = customCenter? functions.getCustomCenter(customCenter,join) : []
+            mappedData['actions'] = functions.getActions(customCenter,isTransportor)
+            mappedData['centers'] = customCenter? functions.getCustomCenter() : []
             if(results.length > 0 && companyType != 'ناقل'){
                 mappedData['mainData'] = results[0]
                 res.send({

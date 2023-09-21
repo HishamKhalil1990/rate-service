@@ -1622,7 +1622,7 @@ const getBarcodes = async(itemName,pool) => {
     })
 }
 
-const getActions = (customCenter,isTransportor,join) => {
+const getActions = (customCenter,isTransportor) => {
     const actionArr = []
     if(customCenter == 'عمان'){
         actionArr.push('استلام صورة ملونة عن المستندات')
@@ -1630,23 +1630,7 @@ const getActions = (customCenter,isTransportor,join) => {
         actionArr.push('استلام المستندات الأصل وارسالها للعقبة')
         actionArr.push('استلام إذن تسليم')
         actionArr.push('تفعيل إذن التسليم')
-        if(join){
-            actionArr.push('تنظيم البيان')
-            actionArr.push('تخمين البيان')
-            actionArr.push('استلام موافقة على البيان مع عدم الدفع')
-            actionArr.push('دفع البيان')
-            actionArr.push('طلب سيارات من الناقل')
-            actionArr.push('النتائج')
-            actionArr.push('إنجاز')
-        }
     }else if(customCenter == 'العقبة'){
-        if(join){
-            actionArr.push('استلام صورة ملونة عن المستندات')
-            actionArr.push('فتح عملية')
-            actionArr.push('استلام المستندات الأصل وارسالها للعقبة')
-            actionArr.push('استلام إذن تسليم')
-            actionArr.push('تفعيل إذن التسليم')
-        }
         actionArr.push('تنظيم البيان')
         actionArr.push('تخمين البيان')
         actionArr.push('استلام موافقة على البيان مع عدم الدفع')
@@ -1664,18 +1648,8 @@ const getActions = (customCenter,isTransportor,join) => {
     return actionArr
 }
 
-const getCustomCenter = (customCenter,join) => {
-    if(customCenter == 'عمان'){
-        if(join){
-            return ["جمرك عمان","جمرك المطار","جمرك سحاب","جمرك العقبة"]
-        }
-        return ["جمرك عمان","جمرك المطار","جمرك سحاب"]
-    }else if(customCenter == 'العقبة'){
-        if(join){
-            return ["جمرك عمان","جمرك المطار","جمرك سحاب","جمرك العقبة"]
-        }
-        return ["جمرك العقبة"]
-    }
+const getCustomCenter = () => {
+    return ["جمرك عمان","جمرك المطار","جمرك سحاب","جمرك العقبة"]
 }
 
 module.exports = {
