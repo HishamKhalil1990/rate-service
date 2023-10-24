@@ -1306,13 +1306,13 @@ const sendMsg = async(data,uniqueValue) => {
     let msg = ''
     switch(data.serviceLevelValue){
         case `راضي`:
-            msg = 'شكرا لزيارتك الريحان. نتمى لك يوما سعيدا'
+            msg = 'شكرا لزيارتك الريحان. نتمنى لك يوما سعيدا'
             break;
         case `غير راضي`:
             msg = 'شكرا لزيارتك الريحان. سيتم التواصل معك قريبا لمعرفة كيف كانت تجربتك بفرع الريحان'
             break;
         case `غير مدخل`:
-            msg = 'شكرا لزيارتك الريحان. نتمى لك يوما سعيدا'
+            msg = 'شكرا لزيارتك الريحان. نتمنى لك يوما سعيدا'
             break;
     }
     const params = new URLSearchParams();
