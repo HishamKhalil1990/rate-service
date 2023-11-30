@@ -921,17 +921,17 @@ const saveCatRecord = async(category,rateID,pool,info,rateScore) =>{
                         ) 
                         values 
                         (
-                            '${rateID}',
-                            '${info.branch}',
+                            N'${rateID}',
+                            N'${info.branch}',
                             ${info.noOfEmployees},
-                            '${info.names}',
-                            '${category.name}',
+                            N'${info.names}',
+                            N'${category.name}',
                             ${parseFloat(category.total*100/category.maxTotal).toFixed(3)},
-                            '${category.note}',
+                            N'${category.note}',
                             '${new Date(info.date).toISOString().split('T')[0]}',
                             ${rateScore},
                             ${category.questions.length},
-                            '${info.username}'
+                            N'${info.username}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -987,15 +987,15 @@ const saveQuestions = async(question,rateID,pool,info,catName) => {
                         ) 
                         values 
                         (
-                            '${rateID}',
-                            '${question.qCode}',
-                            '${question.question}',
-                            '${catName}',
+                            N'${rateID}',
+                            N'${question.qCode}',
+                            N'${question.question}',
+                            N'${catName}',
                             ${question.score},
                             ${question.maxGrade},
-                            '${info.branch}',
+                            N'${info.branch}',
                             '${new Date(info.date).toISOString().split('T')[0]}',
-                            '${question.note}'
+                            N'${question.note}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -1092,8 +1092,8 @@ const saveImagePath = async(rateID,path,pool) => {
                         ) 
                         values 
                         (
-                            '${rateID}',
-                            '${path}'
+                            N'${rateID}',
+                            N'${path}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -1221,11 +1221,11 @@ const saveRecordInCustTable = async(data,pool) => {
                         ) 
                         values 
                         (
-                            '${data.branch}',
-                            '${data.userName}',
-                            '${data.phoneNo}',
-                            '${data.serviceLevelValue}',
-                            '${uniqueValue}'
+                            N'${data.branch}',
+                            N'${data.userName}',
+                            N'${data.phoneNo}',
+                            N'${data.serviceLevelValue}',
+                            N'${uniqueValue}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -1376,13 +1376,13 @@ const saveVisitQuestions = async(question,visitID,pool,info,catName) => {
                         ) 
                         values 
                         (
-                            '${visitID}',
-                            '${question.qCode}',
-                            '${question.question}',
-                            '${catName}',
-                            '${question.score}',
+                            N'${visitID}',
+                            N'${question.qCode}',
+                            N'${question.question}',
+                            N'${catName}',
+                            ${question.score},
                             ${question.maxGrade},
-                            '${question.note}'
+                            N'${question.note}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -1442,19 +1442,19 @@ const saveVisitCatRecord = async(category,visitID,pool,info,visitScore) =>{
                         ) 
                         values 
                         (
-                            '${visitID}',
-                            '${info.branch}',
-                            '${info.visitorName}',
-                            '${info.supervisorName}',
-                            '${category.name}',
+                            N'${visitID}',
+                            N'${info.branch}',
+                            N'${info.visitorName}',
+                            N'${info.supervisorName}',
+                            N'${category.name}',
                             ${parseFloat(category.total*100/category.maxTotal).toFixed(2)},
                             '${new Date(info.date).toISOString().split('T')[0]}',
-                            '${getTimeFormat(new Date(info.date))}',
-                            '${getTimeFormat(new Date(Date.now()))}',
+                            N'${getTimeFormat(new Date(info.date))}',
+                            N'${getTimeFormat(new Date(Date.now()))}',
                             ${visitScore},
                             ${category.questions.length},
-                            '${info.favourite}',
-                            '${info.username}'
+                            N'${info.favourite}',
+                            N'${info.username}'
                         )`
                         , (err, result) => {
                             if(err){
