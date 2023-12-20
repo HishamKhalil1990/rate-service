@@ -595,7 +595,7 @@ const startContainerTransaction = async (data,pool) => {
                 }
                 pool.request()
                 .input("BL",data.bL)
-                .input("ContainerID",data.containerNo)
+                .input("ContainerNo",data.containerNo)
                 .input("DriverName",data.driverName)
                 .input("DriverMobile",data.driverNumber)
                 .input("TruckNo",data.truckNumber)
@@ -917,7 +917,9 @@ const saveCatRecord = async(category,rateID,pool,info,rateScore) =>{
                             ratedate,
                             rateScore,
                             noOfQuestions,
-                            username
+                            username,
+                            longitude,
+                            latitude
                         ) 
                         values 
                         (
@@ -931,7 +933,9 @@ const saveCatRecord = async(category,rateID,pool,info,rateScore) =>{
                             '${new Date(info.date).toISOString().split('T')[0]}',
                             ${rateScore},
                             ${category.questions.length},
-                            N'${info.username}'
+                            N'${info.username}',
+                            N'${info.long}',
+                            N'${info.lat}'
                         )`
                         , (err, result) => {
                             if(err){
@@ -1151,6 +1155,8 @@ const saveCategoriesRate = async(data,rateID) => {
                     names:getNames(data.names),
                     noOfEmployees:data.names.length,
                     date:data.date,
+                    long:data.long,
+                    lat:data.lat
                 }
                 const arr = []
                 const length = categories.length
