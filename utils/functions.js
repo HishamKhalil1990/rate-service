@@ -7,6 +7,7 @@ const fs = require('fs')
 const sendEmail = require('./email')
 const hana = require('./hana')
 const axios = require('axios')
+const locations = require('./locations')
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY
 const MALTRANS_USERS_TABLE = process.env.MALTRANS_USERS_TABLE
@@ -710,15 +711,21 @@ const getBranches = async(info) => {
     if(info.roleNo == 0 || info.warehouses == 'allrayhan'){
         let whs = await hana.getWhsNames()
         whs = whs.map(rec => {
-            return rec.WhsName
-        })
+            return {
+                whsName:rec.WhsName,
+                location:locations[`${rec.WhsCode}`]
+            }
+        }).filter(rec => rec.location)
         return whs
     }else{
         const arr = info.warehouses.split('-')
         let whs = await hana.getWhsNames()
         whs = whs.filter(rec => arr.includes(rec.WhsCode))
         whs = whs.map(rec => {
-            return rec.WhsName
+            return {
+                whsName:rec.WhsName,
+                location:locations[`${rec.WhsCode}`]
+            }
         })
         return whs
     }

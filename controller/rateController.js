@@ -10,17 +10,24 @@ const checkUser = async (req, res) => {
       roleNo:users[0].roleNo
     }
     if(users?.length > 0){
-      const branches = await functions.getBranches(info)
+      const data = await functions.getBranches(info)
+      let locations = {}
+      const branches = data.map(rec => {
+        locations[rec.whsName] = rec.location
+        return rec.whsName
+      })
       if(branches){
         const categories = await functions.getCategories(info)
         if(categories){
           res.send({
             status: "success",
+            checkLocation:true,
             username: users[0].supervisorName,
             info,
             data: {
               branches,
-              categories
+              categories,
+              locations
             }
           })
         }else{
@@ -58,16 +65,23 @@ const checkUser = async (req, res) => {
 const getQuestions = async (req, res) => {
   const info = req.body
   try{
-    const branches = await functions.getBranches(info)
+    const data = await functions.getBranches(info)
+    let locations = {}
+    const branches = data.map(rec => {
+      locations[rec.whsName] = rec.location
+      return rec.whsName
+    })
     if(branches){
       const categories = await functions.getCategories(info)
       if(categories){
         await functions.getQuesAnswers(info,categories)
         res.send({
           status: "success",
+          checkLocation:true,
           data: {
             branches,
-            categories
+            categories,
+            locations
           }
         })
       }else{
@@ -118,12 +132,19 @@ const getBranchesList = async (req, res) => {
     roleNo:0
   }
   try{
-    const branches = await functions.getBranches(info)
+    const data = await functions.getBranches(info)
+    let locations = {}
+    const branches = data.map(rec => {
+      locations[rec.whsName] = rec.location
+      return rec.whsName
+    })
     if(branches){
       res.send({
         status: "success",
+        checkLocation:true,
         data: {
           branches,
+          locations
         }
       })
     }else{
