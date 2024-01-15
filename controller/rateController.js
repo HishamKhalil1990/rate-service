@@ -1,4 +1,5 @@
 const functions = require('../utils/functions')
+const getPDFLink = require('../utils/pdf')
 
 const checkUser = async (req, res) => {
   try{
@@ -118,6 +119,7 @@ const saveRate = async (req, res) => {
     res.send({
       status: "success",
     });
+    getPDFLink(data,files)
   })
   .catch(() => {
     res.send({
