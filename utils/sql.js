@@ -14,7 +14,7 @@ const mssqlUsersConfig = {
     server: MSSQL_LOCAL_ADDRESS,
     port: 1433,
     pool: {
-          max: 1000,
+          max: 200,
           min: 0,
           idleTimeoutMillis: 30000,
           acquireTimeoutMillis: 30000,
@@ -36,7 +36,7 @@ const mssqlTransactionConfig = {
     server: MSSQL_LOCAL_ADDRESS,
     port: 1433,
     pool: {
-          max: 1000,
+          max: 200,
           min: 0,
           idleTimeoutMillis: 30000,
           acquireTimeoutMillis: 30000,

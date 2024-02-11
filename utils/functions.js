@@ -31,6 +31,7 @@ const MSSQL_TRAIN_LIST_QUESTIONS = process.env.MSSQL_TRAIN_LIST_QUESTIONS
 const MSSQL_TRAIN_QUESTIONS_SCORES = process.env.MSSQL_TRAIN_QUESTIONS_SCORES
 const MSSQL_TRAIN_GENERAL_INFO = process.env.MSSQL_TRAIN_GENERAL_INFO
 const MSSQL_BARCODE_SEARCH = process.env.MSSQL_BARCODE_SEARCH
+const MSSQL_PARTNERS = process.env.MSSQL_PARTNERS
 const JORMAL_SERNDERID = process.env.JORMAL_SERNDERID
 const JORMAL_ACCNAME = process.env.JORMAL_ACCNAME
 const JORMAL_ACCPASS = process.env.JORMAL_ACCPASS
@@ -1573,13 +1574,13 @@ const saveCategoriesReport = async(data) => {
     })
 }
 
-const searchBarcodes = async(itemName) => {
+const searchBarcodes = async(itemName,partner) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
             try{
                 const pool = await sql.getSQL();
                 if(pool){
-                    await getBarcodes(itemName,pool)
+                    await getBarcodes(itemName,partner,pool)
                     .then(results => {
                         pool.close()
                         resolve(results)
@@ -1599,7 +1600,7 @@ const searchBarcodes = async(itemName) => {
     })
 }
 
-const getBarcodes = async(itemName,pool) => {
+const getBarcodes = async(itemName,partner,pool) => {
     return new Promise((resolve,reject) => {
         const start = async() => {
             try{
@@ -1611,6 +1612,7 @@ const getBarcodes = async(itemName,pool) => {
                     }
                     pool.request()
                     .input("ItemDesc",itemName)
+                    .input("Partner",partner)
                     .execute(MSSQL_BARCODE_SEARCH,(err,result) => {
                         if(err){
                             console.log('excute',err)
@@ -1633,6 +1635,26 @@ const getBarcodes = async(itemName,pool) => {
         }
         start()
     })
+}
+
+const getPartners = async() => {
+    try{
+        const pool = await sql.getSQL();
+        const partners = await pool.request().query(`Select Distinct Partner from ${MSSQL_PARTNERS}`)
+        .then(result => {
+            pool.close();
+            return result.recordset.map(rec => rec.Partner);
+        })
+        return {
+            partners,
+            msg:'success'
+        }
+    }catch(err){
+        return {
+            partners:[],
+            msg: 'الرجاء المحاولة مرة اخرى'
+        }
+    }
 }
 
 const getActions = (customCenter,isTransportor) => {
@@ -1687,5 +1709,6 @@ module.exports = {
     searchBarcodes,
     getQuesAnswers,
     getActions,
-    getCustomCenter
+    getCustomCenter,
+    getPartners
 }
